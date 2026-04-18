@@ -1,0 +1,209 @@
+import type { Express, Request, Response } from "express";
+import type { Server } from "http";
+import { storage } from "./storage";
+import { api } from "@shared/routes";
+import { z } from "zod";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
+import { pool } from "./db";
+import bcrypt from "bcrypt";
+import multer from "multer";
+import { parse } from "csv-parse/sync";
+import { insertProductSchema } from "@shared/schema";
+
+declare module "express-session" {
+  interface SessionData {
+    adminAuthenticated?: boolean;
+  }
+}
+
+const PgSession = connectPgSimple(session);
+const sessionStore = new PgSession({ pool, createTableIfMissing: true });
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
+  app.use(
+    session({
+      store: sessionStore,
+      secret: process.env.SESSION_SECRET || "amas-jewel-boutique-s3cr3t-k3y-2026-pr0duct10n",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        httpOnly: true,
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      },
+    })
+  );
+
+  // Products
+  app.get(api.products.list.path, async (req, res) => {
+    const products = await storage.getProducts();
+    res.json(products);
+  });
+
+  app.get(api.products.get.path, async (req, res) => {
+    const product = await storage.getProduct(Number(req.params.id));
+    if (!product) return res.status(404).json({ message: "Product not found" });
+    res.json(product);
+  });
+
+  app.post(api.products.create.path, async (req, res) => {
+    try {
+      if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+      const input = api.products.create.input.parse(req.body);
+      const product = await storage.createProduct({ ...input, price: String(input.price) });
+      res.status(201).json(product);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
+  app.put(api.products.update.path, async (req, res) => {
+    try {
+      if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+      const input = api.products.update.input.parse(req.body);
+      const updates: Record<string, any> = { ...input };
+      if (updates.price !== undefined) updates.price = String(updates.price);
+      const product = await storage.updateProduct(Number(req.params.id), updates as any);
+      if (!product) return res.status(404).json({ message: "Product not found" });
+      res.json(product);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
+  app.delete(api.products.delete.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    const deleted = await storage.deleteProduct(Number(req.params.id));
+    if (!deleted) return res.status(404).json({ message: "Product not found" });
+    res.status(204).send();
+  });
+
+  // Bulk CSV Upload
+  app.post("/api/products/bulk", upload.single("file"), async (req: Request, res: Response) => {
+    try {
+      if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+      if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+      const csvContent = req.file.buffer.toString("utf-8");
+      let records: any[];
+      try {
+        records = parse(csvContent, { columns: true, skip_empty_lines: true, trim: true });
+      } catch (e: any) {
+        return res.status(400).json({ message: `CSV error: ${e.message}` });
+      }
+      const inserted: number[] = [];
+      const errors: string[] = [];
+      for (let i = 0; i < records.length; i++) {
+        const row = records[i];
+        try {
+          const productData = {
+            name: row.name, description: row.description, price: String(row.price),
+            imageUrl: row.imageUrl, category: row.category, stock: parseInt(row.stock) || 0,
+            isNew: row.isNew === "true", isBestSeller: row.isBestSeller === "true",
+            materials: row.materials || null,
+          };
+          insertProductSchema.parse(productData);
+          const product = await storage.createProduct(productData);
+          inserted.push(product.id);
+        } catch (err: any) {
+          errors.push(`Row ${i + 2}: ${err instanceof z.ZodError ? err.errors.map((e: any) => e.message).join(", ") : err.message}`);
+        }
+      }
+      res.json({ inserted: inserted.length, errors });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // Orders
+  app.get(api.orders.list.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    res.json(await storage.getOrders());
+  });
+
+  app.post(api.orders.create.path, async (req, res) => {
+    try {
+      const input = api.orders.create.input.parse(req.body);
+      const order = await storage.createOrder(
+        { customerName: input.customerName, customerPhone: input.customerPhone, customerAddress: input.customerAddress, totalAmount: String(input.totalAmount), paymentMethod: input.paymentMethod },
+        input.items
+      );
+      res.status(201).json(order);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
+  app.patch(api.orders.updateStatus.path, async (req, res) => {
+    try {
+      if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+      const input = api.orders.updateStatus.input.parse(req.body);
+      const order = await storage.updateOrderStatus(Number(req.params.id), input.status);
+      if (!order) return res.status(404).json({ message: "Order not found" });
+      res.json(order);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
+  // Admin Auth
+  app.post(api.admin.login.path, async (req: Request, res: Response) => {
+    try {
+      const input = api.admin.login.input.parse(req.body);
+      const admin = await storage.getAdminByUsername(input.username);
+      if (admin && await bcrypt.compare(input.password, admin.password)) {
+        (req.session as any).adminAuthenticated = true;
+        return res.json({ success: true });
+      }
+      res.status(401).json({ message: "Invalid credentials" });
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(401).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
+  app.post(api.admin.logout.path, (req: Request, res: Response) => {
+    req.session.destroy(() => res.json({ success: true }));
+  });
+
+  app.get(api.admin.checkAuth.path, (req: Request, res: Response) => {
+    res.json({ authenticated: !!(req.session as any).adminAuthenticated });
+  });
+
+  app.get(api.admin.stats.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    res.json(await storage.getAdminStats());
+  });
+
+  await seedDatabase();
+  return httpServer;
+}
+
+async function seedDatabase() {
+  try {
+    const existingAdmin = await storage.getAdminByUsername("admin");
+    if (!existingAdmin) {
+      await storage.createAdmin("admin", await bcrypt.hash("Amas@2026!", 10));
+      console.log("✅ Default admin created.");
+    }
+    const existingProducts = await storage.getProducts();
+    if (existingProducts.length === 0) {
+      const sampleProducts = [
+        { name: "Elegant Gold Ring", description: "A beautiful handcrafted gold ring with intricate details.", price: "1200", imageUrl: "https://images.unsplash.com/photo-1605100804763-247f66126e28?q=80&w=600&auto=format&fit=crop", category: "Rings", stock: 10, isNew: true, isBestSeller: true, materials: "18K Gold" },
+        { name: "Pearl Drop Earrings", description: "Classic pearl earrings with a modern twist.", price: "850", imageUrl: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=600&auto=format&fit=crop", category: "Earrings", stock: 15, isNew: true, isBestSeller: false, materials: "Freshwater Pearls, Sterling Silver" },
+        { name: "Diamond Pendant Necklace", description: "A stunning diamond pendant that captures the light from every angle.", price: "3500", imageUrl: "https://images.unsplash.com/photo-1599643478524-fb66f7ca265b?q=80&w=600&auto=format&fit=crop", category: "Necklaces", stock: 5, isNew: false, isBestSeller: true, materials: "Diamonds, 18K White Gold" },
+        { name: "Minimalist Silver Bracelet", description: "A sleek and simple silver bracelet.", price: "450", imageUrl: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?q=80&w=600&auto=format&fit=crop", category: "Bracelets", stock: 20, isNew: false, isBestSeller: false, materials: "Sterling Silver" },
+      ];
+      for (const p of sampleProducts) await storage.createProduct(p);
+      console.log("✅ Sample products seeded.");
+    }
+  } catch (err) {
+    console.error("Seed error:", err);
+  }
+}

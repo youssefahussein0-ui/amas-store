@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Amiri:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Montserrat', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-arabic: 'Amiri', serif;
+
+    /* Off-white #FAF9F6 */
+    --background: 40 25% 97%;
+    /* Dark elegant text */
+    --foreground: 0 0% 15%;
+
+    /* Burgundy #6E1224 */
+    --primary: 348 72% 25%;
+    --primary-foreground: 40 25% 97%;
+
+    /* Gold #D4AF37 */
+    --secondary: 46 65% 52%;
+    --secondary-foreground: 0 0% 15%;
+
+    --accent: 46 65% 52%;
+    --accent-foreground: 0 0% 15%;
+
+    --muted: 40 10% 90%;
+    --muted-foreground: 0 0% 40%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%;
+
+    --border: 40 15% 85%;
+    --input: 40 15% 85%;
+    --ring: 348 72% 25%;
+
+    --radius: 0.25rem;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-secondary/30 selection:text-primary;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    @apply tracking-wide text-primary;
+  }
+
+  /* RTL Arabic styling */
+  [dir="rtl"] body {
+    font-family: var(--font-arabic), var(--font-sans);
+  }
+
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4,
+  [dir="rtl"] h5,
+  [dir="rtl"] h6 {
+    font-family: var(--font-arabic), var(--font-serif);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .glass-nav {
+    @apply bg-background/80 backdrop-blur-md border-b border-border/50;
+  }
+
+  .luxury-shadow {
+    box-shadow: 0 10px 40px -10px rgba(110, 18, 36, 0.08);
+  }
+
+  .gold-gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#B4901B] via-[#D4AF37] to-[#F3E5AB];
+  }
+
+  /* RTL utilities */
+  .hover-elevate {
+    @apply transition-transform duration-200;
+  }
+  .hover-elevate:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Hide scrollbar for clean look */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--secondary));
+}
+
+/* RTL-specific layout adjustments */
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+[dir="rtl"] .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+[dir="rtl"] .space-x-6 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
