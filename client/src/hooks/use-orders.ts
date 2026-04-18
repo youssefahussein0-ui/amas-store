@@ -6,7 +6,7 @@ export function useOrders() {
   return useQuery({
     queryKey: [api.orders.list.path],
     queryFn: async () => {
-      const res = await fetch(api.orders.list.path);
+      const res = await fetch(api.orders.list.path, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch orders");
       const data = await res.json();
       return data; // using z.any() in schema
@@ -21,6 +21,7 @@ export function useCreateOrder() {
       const res = await fetch(api.orders.create.path, {
         method: api.orders.create.method,
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error("Failed to create order");
@@ -38,6 +39,7 @@ export function useUpdateOrderStatus() {
       const res = await fetch(url, {
         method: api.orders.updateStatus.method,
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ status }),
       });
       if (!res.ok) throw new Error("Failed to update status");

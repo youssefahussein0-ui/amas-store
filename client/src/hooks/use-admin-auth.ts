@@ -18,6 +18,7 @@ export const useAdminAuth = create<AdminAuthStore>((set) => ({
       const res = await fetch(api.admin.login.path, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ username, password }),
       });
       
@@ -33,7 +34,7 @@ export const useAdminAuth = create<AdminAuthStore>((set) => ({
 
   logout: async () => {
     try {
-      await fetch(api.admin.logout.path, { method: "POST" });
+      await fetch(api.admin.logout.path, { method: "POST", credentials: "include" });
       set({ isAuthenticated: false });
     } catch {
       set({ isAuthenticated: false });
@@ -42,7 +43,7 @@ export const useAdminAuth = create<AdminAuthStore>((set) => ({
 
   checkAuth: async () => {
     try {
-      const res = await fetch(api.admin.checkAuth.path);
+      const res = await fetch(api.admin.checkAuth.path, { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         set({ isAuthenticated: data.authenticated, isLoading: false });

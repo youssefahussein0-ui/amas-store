@@ -89,6 +89,7 @@ export default function AdminProducts() {
 
       const res = await fetch("/api/products/bulk", {
         method: "POST",
+        credentials: "include",
         body: formData,
       });
 
