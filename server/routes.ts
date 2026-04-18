@@ -28,6 +28,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       secret: process.env.SESSION_SECRET || "amas-jewel-boutique-s3cr3t-k3y-2026-pr0duct10n",
       resave: false,
       saveUninitialized: false,
+      proxy: true,
       cookie: {
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
