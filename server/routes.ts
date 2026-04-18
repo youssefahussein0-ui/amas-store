@@ -6,7 +6,7 @@ import { z } from "zod";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { pool } from "./db";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import multer from "multer";
 import { parse } from "csv-parse/sync";
 import { insertProductSchema } from "@shared/schema";
