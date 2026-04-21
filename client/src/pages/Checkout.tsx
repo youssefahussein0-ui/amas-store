@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { convertGoogleDriveLink } from "@/lib/utils";
 
 export default function Checkout() {
   const { items, getCartTotal, clearCart } = useCart();
@@ -172,7 +173,7 @@ export default function Checkout() {
               <div className="space-y-6 mb-8 max-h-[400px] overflow-auto pe-2">
                 {items.map(item => (
                   <div key={item.product.id} className="flex gap-4 items-center">
-                    <img src={item.product.imageUrl} alt={item.product.name} className="w-16 h-16 object-cover rounded" />
+                    <img src={convertGoogleDriveLink(item.product.imageUrl)} alt={item.product.name} className="w-16 h-16 object-cover rounded" />
                     <div className="flex-1">
                       <h4 className="font-medium">{item.product.name}</h4>
                       <p className="text-sm text-muted-foreground">{t("checkout.qty")}: {item.quantity}</p>

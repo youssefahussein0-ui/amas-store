@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { insertProductSchema, insertOrderSchema, products, orders, orderItems } from './schema';
+import { insertProductSchema, insertOrderSchema, insertCategorySchema, products, orders, orderItems, categories } from './schema';
 
 export const errorSchemas = {
   validation: z.object({
@@ -16,6 +16,7 @@ export const errorSchemas = {
 
 const productResponseSchema = z.custom<typeof products.$inferSelect>();
 const orderResponseSchema = z.custom<typeof orders.$inferSelect>();
+const categoryResponseSchema = z.custom<typeof categories.$inferSelect>();
 
 export const api = {
   products: {
@@ -37,7 +38,11 @@ export const api = {
     create: {
       method: 'POST' as const,
       path: '/api/products' as const,
-      input: insertProductSchema.extend({ price: z.union([z.string(), z.number()]), stock: z.coerce.number() }),
+      input: insertProductSchema.extend({ 
+        price: z.union([z.string(), z.number()]), 
+        stock: z.coerce.number(),
+        discountPrice: z.union([z.string(), z.number()]).optional().nullable(),
+      }),
       responses: {
         201: productResponseSchema,
         400: errorSchemas.validation,
@@ -46,7 +51,11 @@ export const api = {
     update: {
       method: 'PUT' as const,
       path: '/api/products/:id' as const,
-      input: insertProductSchema.partial().extend({ price: z.union([z.string(), z.number()]).optional(), stock: z.coerce.number().optional() }),
+      input: insertProductSchema.partial().extend({ 
+        price: z.union([z.string(), z.number()]).optional(), 
+        stock: z.coerce.number().optional(),
+        discountPrice: z.union([z.string(), z.number()]).optional().nullable(),
+      }),
       responses: {
         200: productResponseSchema,
         400: errorSchemas.validation,
@@ -56,6 +65,50 @@ export const api = {
     delete: {
       method: 'DELETE' as const,
       path: '/api/products/:id' as const,
+      responses: {
+        204: z.void(),
+        404: errorSchemas.notFound,
+      },
+    },
+  },
+  categories: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/categories' as const,
+      responses: {
+        200: z.array(categoryResponseSchema),
+      },
+    },
+    get: {
+      method: 'GET' as const,
+      path: '/api/categories/:id' as const,
+      responses: {
+        200: categoryResponseSchema,
+        404: errorSchemas.notFound,
+      },
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/categories' as const,
+      input: insertCategorySchema,
+      responses: {
+        201: categoryResponseSchema,
+        400: errorSchemas.validation,
+      },
+    },
+    update: {
+      method: 'PUT' as const,
+      path: '/api/categories/:id' as const,
+      input: insertCategorySchema.partial(),
+      responses: {
+        200: categoryResponseSchema,
+        400: errorSchemas.validation,
+        404: errorSchemas.notFound,
+      },
+    },
+    delete: {
+      method: 'DELETE' as const,
+      path: '/api/categories/:id' as const,
       responses: {
         204: z.void(),
         404: errorSchemas.notFound,

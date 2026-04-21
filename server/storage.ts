@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { products, orders, orderItems, adminUsers, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser } from "@shared/schema";
+import { products, orders, orderItems, adminUsers, categories, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
@@ -14,6 +14,11 @@ export interface IStorage {
   getAdminStats(): Promise<{totalOrders: number, totalRevenue: number, totalProducts: number}>;
   getAdminByUsername(username: string): Promise<AdminUser | undefined>;
   createAdmin(username: string, hashedPassword: string): Promise<AdminUser>;
+  getCategories(): Promise<Category[]>;
+  getCategory(id: number): Promise<Category | undefined>;
+  createCategory(category: InsertCategory): Promise<Category>;
+  updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category | undefined>;
+  deleteCategory(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -84,6 +89,30 @@ export class DatabaseStorage implements IStorage {
   async createAdmin(username: string, hashedPassword: string): Promise<AdminUser> {
     const [admin] = await db.insert(adminUsers).values({ username, password: hashedPassword }).returning();
     return admin;
+  }
+
+  async getCategories(): Promise<Category[]> {
+    return await db.select().from(categories).orderBy(desc(categories.createdAt));
+  }
+
+  async getCategory(id: number): Promise<Category | undefined> {
+    const [category] = await db.select().from(categories).where(eq(categories.id, id));
+    return category;
+  }
+
+  async createCategory(insertCategory: InsertCategory): Promise<Category> {
+    const [category] = await db.insert(categories).values(insertCategory).returning();
+    return category;
+  }
+
+  async updateCategory(id: number, updates: Partial<InsertCategory>): Promise<Category | undefined> {
+    const [category] = await db.update(categories).set(updates).where(eq(categories.id, id)).returning();
+    return category;
+  }
+
+  async deleteCategory(id: number): Promise<boolean> {
+    const [deleted] = await db.delete(categories).where(eq(categories.id, id)).returning();
+    return !!deleted;
   }
 }
 

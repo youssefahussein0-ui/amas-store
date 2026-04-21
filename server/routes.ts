@@ -9,7 +9,7 @@ import { pool } from "./db";
 import bcrypt from "bcryptjs";
 import multer from "multer";
 import { parse } from "csv-parse/sync";
-import { insertProductSchema } from "@shared/schema";
+import { insertProductSchema, insertCategorySchema } from "@shared/schema";
 
 declare module "express-session" {
   interface SessionData {
@@ -54,7 +54,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
       const input = api.products.create.input.parse(req.body);
-      const product = await storage.createProduct({ ...input, price: String(input.price) });
+      const product = await storage.createProduct({ 
+        ...input, 
+        price: String(input.price),
+        discountPrice: input.discountPrice ? String(input.discountPrice) : null,
+      });
       res.status(201).json(product);
     } catch (err) {
       if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
@@ -68,6 +72,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const input = api.products.update.input.parse(req.body);
       const updates: Record<string, any> = { ...input };
       if (updates.price !== undefined) updates.price = String(updates.price);
+      if (updates.discountPrice !== undefined) updates.discountPrice = updates.discountPrice ? String(updates.discountPrice) : null;
       const product = await storage.updateProduct(Number(req.params.id), updates as any);
       if (!product) return res.status(404).json({ message: "Product not found" });
       res.json(product);
@@ -106,6 +111,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
             imageUrl: row.imageUrl, category: row.category, stock: parseInt(row.stock) || 0,
             isNew: row.isNew === "true", isBestSeller: row.isBestSeller === "true",
             materials: row.materials || null,
+            discountPrice: row.discountPrice ? String(row.discountPrice) : null,
           };
           insertProductSchema.parse(productData);
           const product = await storage.createProduct(productData);
@@ -118,6 +124,49 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
+  });
+
+  // Categories
+  app.get(api.categories.list.path, async (req, res) => {
+    res.json(await storage.getCategories());
+  });
+
+  app.get(api.categories.get.path, async (req, res) => {
+    const category = await storage.getCategory(Number(req.params.id));
+    if (!category) return res.status(404).json({ message: "Category not found" });
+    res.json(category);
+  });
+
+  app.post(api.categories.create.path, async (req, res) => {
+    try {
+      if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+      const input = insertCategorySchema.parse(req.body);
+      const category = await storage.createCategory(input);
+      res.status(201).json(category);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
+  app.put(api.categories.update.path, async (req, res) => {
+    try {
+      if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+      const input = insertCategorySchema.partial().parse(req.body);
+      const category = await storage.updateCategory(Number(req.params.id), input);
+      if (!category) return res.status(404).json({ message: "Category not found" });
+      res.json(category);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
+  app.delete(api.categories.delete.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    const deleted = await storage.deleteCategory(Number(req.params.id));
+    if (!deleted) return res.status(404).json({ message: "Category not found" });
+    res.status(204).send();
   });
 
   // Orders
@@ -192,6 +241,17 @@ async function seedDatabase() {
     if (!existingAdmin) {
       await storage.createAdmin("admin", await bcrypt.hash("Amas@2026!", 10));
       console.log("✅ Default admin created.");
+    }
+    const existingCategories = await storage.getCategories();
+    if (existingCategories.length === 0) {
+      const defaultCategories = [
+        { slug: "Rings", nameEn: "Rings", nameAr: "خواتم", imageUrl: "https://images.unsplash.com/photo-1605100804763-247f67b63f6e?w=800" },
+        { slug: "Necklaces", nameEn: "Necklaces", nameAr: "قلادات", imageUrl: "https://images.unsplash.com/photo-1599643478524-fb66f72400ce?w=800" },
+        { slug: "Bracelets", nameEn: "Bracelets", nameAr: "أساور", imageUrl: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800" },
+        { slug: "Earrings", nameEn: "Earrings", nameAr: "أقراط", imageUrl: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800" },
+      ];
+      for (const cat of defaultCategories) await storage.createCategory(cat);
+      console.log("✅ Default categories seeded.");
     }
     const existingProducts = await storage.getProducts();
     if (existingProducts.length === 0) {

@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { convertGoogleDriveLink } from "@/lib/utils";
 
 export default function ProductDetails() {
   const params = useParams();
@@ -66,7 +67,7 @@ export default function ProductDetails() {
             {/* Image Gallery */}
             <div className="space-y-4">
               <div className="aspect-[4/5] bg-muted/20 rounded-xl overflow-hidden shadow-xl">
-                <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                <img src={convertGoogleDriveLink(product.imageUrl)} alt={product.name} className="w-full h-full object-cover" />
               </div>
             </div>
 
@@ -76,7 +77,15 @@ export default function ProductDetails() {
                 <span className="text-sm uppercase tracking-widest text-secondary font-medium">{product.category}</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">{product.name}</h1>
-              <p className="text-2xl font-light text-foreground mb-8">${Number(product.price).toFixed(2)}</p>
+              {product.discountPrice ? (
+                <div className="flex items-center gap-4 mb-8">
+                  <span className="text-3xl font-serif text-primary">${Number(product.discountPrice).toFixed(2)}</span>
+                  <span className="text-xl text-muted-foreground line-through">${Number(product.price).toFixed(2)}</span>
+                  <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded uppercase">{t("product.sale")}</span>
+                </div>
+              ) : (
+                <p className="text-2xl font-light text-foreground mb-8">${Number(product.price).toFixed(2)}</p>
+              )}
 
               <div className="prose prose-sm text-muted-foreground font-light mb-8">
                 <p>{product.description}</p>

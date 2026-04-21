@@ -52,7 +52,8 @@
     "lifetimeWarranty": "Lifetime Warranty",
     "freeShipping": "Free Global Shipping",
     "returns": "30-Day Returns",
-    "youMayAlsoLike": "You May Also Like"
+    "youMayAlsoLike": "You May Also Like",
+    "sale": "Sale"
   },
   "cart": {
     "title": "Shopping Cart",
@@ -116,6 +117,7 @@
     },
     "sidebar": {
       "dashboard": "Dashboard",
+      "categories": "Categories",
       "products": "Products",
       "orders": "Orders",
       "logout": "Logout"
@@ -129,14 +131,22 @@
       "realtime": "Updated in real-time",
       "failedStats": "Failed to load statistics"
     },
+    "categories": {
+      "title": "Manage Categories",
+      "addCategory": "Add Category",
+      "addNewCategory": "Add New Category",
+      "editCategory": "Edit Category"
+    },
     "products": {
       "title": "Manage Products",
       "addProduct": "Add Product",
       "uploadFile": "Upload File",
       "addNewProduct": "Add New Product",
+      "editProduct": "Edit Product",
       "bulkUpload": "Bulk Upload Products",
       "name": "Name",
       "price": "Price",
+      "discountPrice": "Discount Price",
       "category": "Category",
       "stock": "Stock",
       "imageUrl": "Image URL",
@@ -145,16 +155,18 @@
       "isNew": "Is New Collection",
       "isBestSeller": "Is Best Seller",
       "create": "Create",
+      "update": "Update",
       "actions": "Actions",
       "productCol": "Product",
       "success": "Success",
       "productCreated": "Product created.",
+      "productUpdated": "Product updated.",
       "deleted": "Deleted",
       "confirmDelete": "Are you sure?",
       "downloadTemplate": "Download CSV Template",
       "uploadCsv": "Upload CSV File",
       "dragDrop": "Drag & drop your CSV file here, or click to browse",
-      "csvFormat": "CSV file with columns: name, description, price, imageUrl, category, stock, isNew, isBestSeller, materials",
+      "csvFormat": "CSV file with columns: name, description, price, imageUrl, category, stock, isNew, isBestSeller, materials, discountPrice",
       "uploading": "Uploading...",
       "uploadSuccess": "Upload Complete",
       "uploadError": "Upload Error",

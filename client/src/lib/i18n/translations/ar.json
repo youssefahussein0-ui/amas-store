@@ -52,7 +52,8 @@
     "lifetimeWarranty": "ضمان مدى الحياة",
     "freeShipping": "شحن مجاني عالمي",
     "returns": "إرجاع خلال 30 يوم",
-    "youMayAlsoLike": "قد يعجبك أيضاً"
+    "youMayAlsoLike": "قد يعجبك أيضاً",
+    "sale": "تخفيض"
   },
   "cart": {
     "title": "سلة التسوق",
@@ -116,6 +117,7 @@
     },
     "sidebar": {
       "dashboard": "لوحة المعلومات",
+      "categories": "الفئات",
       "products": "المنتجات",
       "orders": "الطلبات",
       "logout": "تسجيل الخروج"
@@ -129,14 +131,22 @@
       "realtime": "يتم التحديث في الوقت الفعلي",
       "failedStats": "فشل تحميل الإحصائيات"
     },
+    "categories": {
+      "title": "إدارة الفئات",
+      "addCategory": "إضافة فئة",
+      "addNewCategory": "إضافة فئة جديدة",
+      "editCategory": "تعديل الفئة"
+    },
     "products": {
       "title": "إدارة المنتجات",
       "addProduct": "إضافة منتج",
       "uploadFile": "رفع ملف",
       "addNewProduct": "إضافة منتج جديد",
+      "editProduct": "تعديل المنتج",
       "bulkUpload": "رفع منتجات بالجملة",
       "name": "الاسم",
-      "price": "السعر",
+      "price": "السعر الأصلي",
+      "discountPrice": "سعر الخصم",
       "category": "الفئة",
       "stock": "المخزون",
       "imageUrl": "رابط الصورة",
@@ -145,16 +155,18 @@
       "isNew": "مجموعة جديدة",
       "isBestSeller": "الأكثر مبيعاً",
       "create": "إنشاء",
+      "update": "تحديث",
       "actions": "الإجراءات",
       "productCol": "المنتج",
       "success": "نجاح",
-      "productCreated": "تم إنشاء المنتج.",
+      "productCreated": "تم إنشاء المنتج بنجاح.",
+      "productUpdated": "تم تحديث المنتج بنجاح.",
       "deleted": "تم الحذف",
       "confirmDelete": "هل أنت متأكد؟",
       "downloadTemplate": "تحميل قالب CSV",
       "uploadCsv": "رفع ملف CSV",
       "dragDrop": "اسحب وأفلت ملف CSV هنا، أو انقر للاستعراض",
-      "csvFormat": "ملف CSV بالأعمدة: name, description, price, imageUrl, category, stock, isNew, isBestSeller, materials",
+      "csvFormat": "ملف CSV بالأعمدة: name, description, price, imageUrl, category, stock, isNew, isBestSeller, materials, discountPrice",
       "uploading": "جاري الرفع...",
       "uploadSuccess": "اكتمل الرفع",
       "uploadError": "خطأ في الرفع",

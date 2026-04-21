@@ -13,6 +13,7 @@ export const products = pgTable("products", {
   isNew: boolean("is_new").default(false),
   isBestSeller: boolean("is_best_seller").default(false),
   materials: text("materials"),
+  discountPrice: numeric("discount_price"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -57,3 +58,16 @@ export const adminUsers = pgTable("admin_users", {
 });
 
 export type AdminUser = typeof adminUsers.$inferSelect;
+
+export const categories = pgTable("categories", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  nameEn: text("name_en").notNull(),
+  nameAr: text("name_ar").notNull(),
+  imageUrl: text("image_url").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true });
+export type Category = typeof categories.$inferSelect;
+export type InsertCategory = z.infer<typeof insertCategorySchema>;

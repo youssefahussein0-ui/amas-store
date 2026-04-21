@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { convertGoogleDriveLink } from "@/lib/utils";
 
 interface ProductCardProps {
   product: Product;
@@ -40,15 +41,20 @@ export function ProductCard({ product }: ProductCardProps) {
               {t("product.new")}
             </span>
           )}
-          {product.isBestSeller && !product.isNew && (
+          {product.isBestSeller && !product.isNew && !product.discountPrice && (
             <span className="absolute top-3 left-3 z-10 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-sm">
               {t("product.bestSeller")}
+            </span>
+          )}
+          {product.discountPrice && (
+            <span className="absolute top-3 left-3 z-10 bg-red-600 text-white text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-sm">
+              {t("product.sale")}
             </span>
           )}
           
           <Link href={`/product/${product.id}`} className="block w-full h-full">
             <img
-              src={product.imageUrl}
+              src={convertGoogleDriveLink(product.imageUrl)}
               alt={product.name}
               className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700 ease-out"
             />
@@ -72,7 +78,14 @@ export function ProductCard({ product }: ProductCardProps) {
             <h3 className="font-serif text-lg">{product.name}</h3>
           </Link>
           <p className="text-muted-foreground text-sm mt-1 mb-3">{product.category}</p>
-          <p className="font-medium text-primary">${Number(product.price).toFixed(2)}</p>
+          {product.discountPrice ? (
+            <div className="flex items-center justify-center gap-2">
+              <span className="font-medium text-primary">${Number(product.discountPrice).toFixed(2)}</span>
+              <span className="text-sm text-muted-foreground line-through">${Number(product.price).toFixed(2)}</span>
+            </div>
+          ) : (
+            <p className="font-medium text-primary">${Number(product.price).toFixed(2)}</p>
+          )}
         </div>
       </div>
 
@@ -82,11 +95,18 @@ export function ProductCard({ product }: ProductCardProps) {
           <DialogTitle className="sr-only">{product.name} Quick View</DialogTitle>
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="aspect-square md:aspect-auto h-full bg-muted/20">
-              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+              <img src={convertGoogleDriveLink(product.imageUrl)} alt={product.name} className="w-full h-full object-cover" />
             </div>
             <div className="p-8 md:p-12 flex flex-col justify-center">
               <h2 className="text-3xl font-serif text-primary mb-2">{product.name}</h2>
-              <p className="text-xl font-light mb-6">${Number(product.price).toFixed(2)}</p>
+              {product.discountPrice ? (
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="text-2xl font-serif text-primary">${Number(product.discountPrice).toFixed(2)}</span>
+                  <span className="text-lg text-muted-foreground line-through">${Number(product.price).toFixed(2)}</span>
+                </div>
+              ) : (
+                <p className="text-xl font-light mb-6">${Number(product.price).toFixed(2)}</p>
+              )}
               
               <div className="w-12 h-px bg-secondary mb-6"></div>
               

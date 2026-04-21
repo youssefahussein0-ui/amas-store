@@ -1,5 +1,6 @@
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import { useProducts, useCreateProduct, useDeleteProduct, useUpdateProduct } from "@/hooks/use-products";
+import { useCategories } from "@/hooks/use-categories";
 import { useState, useRef } from "react";
 import { Plus, Edit, Trash2, Loader2, Upload, Download, FileSpreadsheet, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,9 +12,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@shared/routes";
+import { convertGoogleDriveLink } from "@/lib/utils";
 
 export default function AdminProducts() {
   const { data: products, isLoading } = useProducts();
+  const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const createProduct = useCreateProduct();
   const deleteProduct = useDeleteProduct();
   const updateProduct = useUpdateProduct();
@@ -21,7 +24,8 @@ export default function AdminProducts() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
 
-  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [uploadResult, setUploadResult] = useState<{ inserted: number; errors: string[] } | null>(null);
@@ -29,22 +33,59 @@ export default function AdminProducts() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
-    name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: ""
+    name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: ""
   });
 
-  const handleAdd = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setFormData({ name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: "" });
+    setEditingProduct(null);
+  };
+
+  const handleEdit = (product: any) => {
+    setEditingProduct(product);
+    setFormData({
+      name: product.name,
+      description: product.description,
+      price: String(product.price),
+      imageUrl: product.imageUrl,
+      category: product.category,
+      stock: product.stock,
+      isNew: !!product.isNew,
+      isBestSeller: !!product.isBestSeller,
+      materials: product.materials || "",
+      discountPrice: product.discountPrice ? String(product.discountPrice) : ""
+    });
+    setIsFormOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createProduct.mutate({
+    const data = {
       ...formData,
       price: formData.price,
-    }, {
-      onSuccess: () => {
-        setIsAddOpen(false);
-        setFormData({ name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "" });
-        toast({ title: t("admin.products.success"), description: t("admin.products.productCreated") });
-      },
-      onError: (e) => toast({ title: t("admin.login.error"), description: e.message, variant: "destructive" })
-    });
+      discountPrice: formData.discountPrice || null,
+      imageUrl: convertGoogleDriveLink(formData.imageUrl),
+    };
+
+    if (editingProduct) {
+      updateProduct.mutate({ id: editingProduct.id, ...data }, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          resetForm();
+          toast({ title: t("admin.products.success"), description: t("admin.products.productUpdated") });
+        },
+        onError: (e) => toast({ title: t("admin.login.error"), description: e.message, variant: "destructive" })
+      });
+    } else {
+      createProduct.mutate(data, {
+        onSuccess: () => {
+          setIsFormOpen(false);
+          resetForm();
+          toast({ title: t("admin.products.success"), description: t("admin.products.productCreated") });
+        },
+        onError: (e) => toast({ title: t("admin.login.error"), description: e.message, variant: "destructive" })
+      });
+    }
   };
 
   const handleDelete = (id: number) => {
@@ -56,8 +97,8 @@ export default function AdminProducts() {
   };
 
   const downloadTemplate = () => {
-    const headers = "name,description,price,imageUrl,category,stock,isNew,isBestSeller,materials";
-    const sample = '"Sample Ring","A beautiful gold ring",1200,"https://example.com/image.jpg","Rings",10,true,false,"18K Gold"';
+    const headers = "name,description,price,imageUrl,category,stock,isNew,isBestSeller,materials,discountPrice";
+    const sample = '"Sample Ring","A beautiful gold ring",1200,"https://example.com/image.jpg","Rings",10,true,false,"18K Gold",1000';
     const csv = `${headers}\n${sample}`;
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -228,15 +269,15 @@ export default function AdminProducts() {
             </Dialog>
 
             {/* Add Product Button */}
-            <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+            <Dialog open={isFormOpen} onOpenChange={(open) => { setIsFormOpen(open); if (!open) resetForm(); }}>
               <DialogTrigger asChild>
-                <Button className="bg-primary gap-2"><Plus className="w-4 h-4"/> {t("admin.products.addProduct")}</Button>
+                <Button className="bg-primary gap-2" onClick={() => { resetForm(); setIsFormOpen(true); }}><Plus className="w-4 h-4"/> {t("admin.products.addProduct")}</Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>{t("admin.products.addNewProduct")}</DialogTitle>
+                  <DialogTitle>{editingProduct ? t("admin.products.editProduct") : t("admin.products.addNewProduct")}</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleAdd} className="space-y-4 py-4">
+                <form onSubmit={handleSubmit} className="space-y-4 py-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>{t("admin.products.name")}</Label>
@@ -247,12 +288,15 @@ export default function AdminProducts() {
                       <Input required type="number" step="0.01" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} />
                     </div>
                     <div className="space-y-2">
+                      <Label>{t("admin.products.discountPrice")}</Label>
+                      <Input type="number" step="0.01" placeholder="Optional" value={formData.discountPrice} onChange={e=>setFormData({...formData, discountPrice: e.target.value})} />
+                    </div>
+                    <div className="space-y-2">
                       <Label>{t("admin.products.category")}</Label>
                       <select className="w-full border-border rounded-md p-2" value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})}>
-                        <option>Rings</option>
-                        <option>Necklaces</option>
-                        <option>Bracelets</option>
-                        <option>Earrings</option>
+                        {categories?.map(cat => (
+                          <option key={cat.id} value={cat.slug}>{cat.nameEn}</option>
+                        ))}
                       </select>
                     </div>
                     <div className="space-y-2">
@@ -280,8 +324,8 @@ export default function AdminProducts() {
                       <Label htmlFor="isBestSeller">{t("admin.products.isBestSeller")}</Label>
                     </div>
                   </div>
-                  <Button type="submit" disabled={createProduct.isPending} className="w-full mt-4">
-                    {createProduct.isPending ? <Loader2 className="w-4 h-4 animate-spin"/> : t("admin.products.create")}
+                  <Button type="submit" disabled={createProduct.isPending || updateProduct.isPending} className="w-full mt-4">
+                    {(createProduct.isPending || updateProduct.isPending) ? <Loader2 className="w-4 h-4 animate-spin"/> : (editingProduct ? t("admin.products.update") : t("admin.products.create"))}
                   </Button>
                 </form>
               </DialogContent>
@@ -307,7 +351,7 @@ export default function AdminProducts() {
                 {products?.map(p => (
                   <tr key={p.id} className="border-b border-border/50 hover:bg-muted/10 transition-colors">
                     <td className="px-6 py-4 flex items-center gap-3">
-                      <img src={p.imageUrl} alt={p.name} className="w-10 h-10 rounded object-cover" />
+                      <img src={convertGoogleDriveLink(p.imageUrl)} alt={p.name} className="w-10 h-10 rounded object-cover" />
                       <span className="font-medium text-primary">{p.name}</span>
                     </td>
                     <td className="px-6 py-4">{p.category}</td>
@@ -315,6 +359,9 @@ export default function AdminProducts() {
                     <td className="px-6 py-4">{p.stock}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(p)}>
+                          <Edit className="w-4 h-4 text-primary" />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDelete(p.id)} disabled={deleteProduct.isPending}>
                           <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>

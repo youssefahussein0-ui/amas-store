@@ -17,6 +17,7 @@ import Checkout from "./pages/Checkout";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
+import Categories from "./pages/admin/Categories";
 import Orders from "./pages/admin/Orders";
 import { ProtectedAdminRoute } from "@/components/layout/ProtectedAdminRoute";
 
@@ -37,6 +38,9 @@ function Router() {
       </Route>
       <Route path="/admin/products">
         {() => <ProtectedAdminRoute><Products /></ProtectedAdminRoute>}
+      </Route>
+      <Route path="/admin/categories">
+        {() => <ProtectedAdminRoute><Categories /></ProtectedAdminRoute>}
       </Route>
       <Route path="/admin/orders">
         {() => <ProtectedAdminRoute><Orders /></ProtectedAdminRoute>}

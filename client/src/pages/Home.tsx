@@ -2,6 +2,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useProducts } from "@/hooks/use-products";
+import { useCategories } from "@/hooks/use-categories";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
@@ -9,7 +10,8 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function Home() {
   const { data: products, isLoading } = useProducts();
-  const { t } = useLanguage();
+  const { data: categories, isLoading: isLoadingCategories } = useCategories();
+  const { t, language } = useLanguage();
 
   const newCollection = products?.filter(p => p.isNew).slice(0, 4) || [];
   const bestSellers = products?.filter(p => p.isBestSeller).slice(0, 4) || [];
@@ -55,17 +57,14 @@ export default function Home() {
       <section className="py-24 bg-background">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8">
-            {[
-              { name: t("categories.rings"), key: "Rings", img: "https://images.unsplash.com/photo-1605100804763-247f67b63f6e?w=800" },
-              { name: t("categories.necklaces"), key: "Necklaces", img: "https://images.unsplash.com/photo-1599643478524-fb66f72400ce?w=800" },
-              { name: t("categories.bracelets"), key: "Bracelets", img: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800" },
-              { name: t("categories.earrings"), key: "Earrings", img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800" },
-            ].map((cat) => (
-              <Link key={cat.key} href={`/shop?category=${cat.key}`} className="group relative h-[400px] overflow-hidden cursor-pointer">
-                <img src={cat.img} alt={cat.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+            {isLoadingCategories ? (
+              <div className="col-span-4 flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+            ) : categories?.map((cat) => (
+              <Link key={cat.id} href={`/shop?category=${cat.slug}`} className="group relative h-[400px] overflow-hidden cursor-pointer">
+                <img src={cat.imageUrl} alt={language === 'ar' ? cat.nameAr : cat.nameEn} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <h3 className="text-white text-3xl font-serif tracking-wider">{cat.name}</h3>
+                  <h3 className="text-white text-3xl font-serif tracking-wider">{language === 'ar' ? cat.nameAr : cat.nameEn}</h3>
                 </div>
               </Link>
             ))}

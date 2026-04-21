@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { Trash2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { convertGoogleDriveLink } from "@/lib/utils";
 
 export default function Cart() {
   const { items, removeItem, updateQuantity, getCartTotal } = useCart();
@@ -33,7 +34,7 @@ export default function Cart() {
               {items.map(item => (
                 <div key={item.product.id} className="flex gap-6 bg-white p-6 rounded-xl luxury-shadow">
                   <img 
-                    src={item.product.imageUrl} 
+                    src={convertGoogleDriveLink(item.product.imageUrl)} 
                     alt={item.product.name} 
                     className="w-24 h-24 object-cover rounded-lg" 
                   />
