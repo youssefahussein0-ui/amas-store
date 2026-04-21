@@ -53,7 +53,8 @@
     "freeShipping": "Free Global Shipping",
     "returns": "30-Day Returns",
     "youMayAlsoLike": "You May Also Like",
-    "sale": "Sale"
+    "sale": "Sale",
+    "currency": "EGP"
   },
   "cart": {
     "title": "Shopping Cart",

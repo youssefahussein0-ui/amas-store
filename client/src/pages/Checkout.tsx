@@ -178,7 +178,7 @@ export default function Checkout() {
                       <h4 className="font-medium">{item.product.name}</h4>
                       <p className="text-sm text-muted-foreground">{t("checkout.qty")}: {item.quantity}</p>
                     </div>
-                    <p className="font-medium">${(Number(item.product.price) * item.quantity).toFixed(2)}</p>
+                    <p className="font-medium">{(Number(item.product.price) * item.quantity).toFixed(2)} {t("product.currency")}</p>
                   </div>
                 ))}
               </div>
@@ -186,7 +186,7 @@ export default function Checkout() {
               <div className="border-t border-border pt-6 space-y-3">
                 <div className="flex justify-between text-muted-foreground">
                   <span>{t("checkout.subtotal")}</span>
-                  <span>${getCartTotal().toFixed(2)}</span>
+                  <span>{getCartTotal().toFixed(2)} {t("product.currency")}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{t("checkout.shipping")}</span>
@@ -194,7 +194,7 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between text-xl font-serif text-primary pt-4">
                   <span>{t("checkout.total")}</span>
-                  <span>${getCartTotal().toFixed(2)}</span>
+                  <span>{getCartTotal().toFixed(2)} {t("product.currency")}</span>
                 </div>
               </div>
             </div>

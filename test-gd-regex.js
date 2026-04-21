@@ -1,11 +1,5 @@
-const urls = [
-  "https://drive.google.com/file/d/1XyZ_abc123/view?usp=sharing",
-  "https://drive.google.com/open?id=1XyZ_abc123",
-  "https://example.com/image.jpg"
-];
-
-const convertGoogleDriveLink = (url) => {
-  if (!url) return url;
+function convertGoogleDriveLink(url) {
+  if (!url) return "";
   const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (match && match[1]) {
     return `https://drive.google.com/uc?id=${match[1]}`;
@@ -15,6 +9,7 @@ const convertGoogleDriveLink = (url) => {
     return `https://drive.google.com/uc?id=${match2[1]}`;
   }
   return url;
-};
+}
 
-urls.forEach(u => console.log(convertGoogleDriveLink(u)));
+const testUrl = "https://drive.google.com/file/d/15c03gcVxaGDW3Fj14bTpXSlq7DRE2S6c/view?usp=drive_link";
+console.log(convertGoogleDriveLink(testUrl));

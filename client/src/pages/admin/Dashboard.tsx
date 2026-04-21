@@ -13,7 +13,7 @@ export default function AdminDashboard() {
     {
       title: t("admin.dashboard.totalRevenue"),
       icon: DollarSign,
-      value: stats?.totalRevenue ? `$${stats.totalRevenue.toFixed(2)}` : "$0.00",
+      value: stats?.totalRevenue ? `${stats.totalRevenue.toFixed(2)} ${t("product.currency")}` : `0.00 ${t("product.currency")}`,
       color: "text-secondary"
     },
     {

@@ -355,7 +355,7 @@ export default function AdminProducts() {
                       <span className="font-medium text-primary">{p.name}</span>
                     </td>
                     <td className="px-6 py-4">{p.category}</td>
-                    <td className="px-6 py-4">${Number(p.price).toFixed(2)}</td>
+                    <td className="px-6 py-4">{Number(p.price).toFixed(2)} {t("product.currency")}</td>
                     <td className="px-6 py-4">{p.stock}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">

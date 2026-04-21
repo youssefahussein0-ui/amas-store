@@ -80,11 +80,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="text-muted-foreground text-sm mt-1 mb-3">{product.category}</p>
           {product.discountPrice ? (
             <div className="flex items-center justify-center gap-2">
-              <span className="font-medium text-primary">${Number(product.discountPrice).toFixed(2)}</span>
-              <span className="text-sm text-muted-foreground line-through">${Number(product.price).toFixed(2)}</span>
+              <span className="font-medium text-primary">{Number(product.discountPrice).toFixed(2)} {t("product.currency")}</span>
+              <span className="text-sm text-muted-foreground line-through">{Number(product.price).toFixed(2)} {t("product.currency")}</span>
             </div>
           ) : (
-            <p className="font-medium text-primary">${Number(product.price).toFixed(2)}</p>
+            <p className="font-medium text-primary">{Number(product.price).toFixed(2)} {t("product.currency")}</p>
           )}
         </div>
       </div>
@@ -101,11 +101,11 @@ export function ProductCard({ product }: ProductCardProps) {
               <h2 className="text-3xl font-serif text-primary mb-2">{product.name}</h2>
               {product.discountPrice ? (
                 <div className="flex items-center gap-3 mb-6">
-                  <span className="text-2xl font-serif text-primary">${Number(product.discountPrice).toFixed(2)}</span>
-                  <span className="text-lg text-muted-foreground line-through">${Number(product.price).toFixed(2)}</span>
+                  <span className="text-2xl font-serif text-primary">{Number(product.discountPrice).toFixed(2)} {t("product.currency")}</span>
+                  <span className="text-lg text-muted-foreground line-through">{Number(product.price).toFixed(2)} {t("product.currency")}</span>
                 </div>
               ) : (
-                <p className="text-xl font-light mb-6">${Number(product.price).toFixed(2)}</p>
+                <p className="text-xl font-light mb-6">{Number(product.price).toFixed(2)} {t("product.currency")}</p>
               )}
               
               <div className="w-12 h-px bg-secondary mb-6"></div>

@@ -41,7 +41,7 @@ export default function Cart() {
                   <div className="flex-1">
                     <h3 className="font-serif text-lg text-primary">{item.product.name}</h3>
                     <p className="text-muted-foreground text-sm">{item.product.category}</p>
-                    <p className="font-medium mt-2">${Number(item.product.price).toFixed(2)}</p>
+                    <p className="font-medium mt-2">{Number(item.product.price).toFixed(2)} {t("product.currency")}</p>
                   </div>
                   <div className="flex flex-col items-end justify-between">
                     <button 
@@ -71,7 +71,7 @@ export default function Cart() {
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-muted-foreground">
                   <span>{t("cart.subtotal")}</span>
-                  <span>${getCartTotal().toFixed(2)}</span>
+                  <span>{getCartTotal().toFixed(2)} {t("product.currency")}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{t("cart.shipping")}</span>
@@ -79,7 +79,7 @@ export default function Cart() {
                 </div>
                 <div className="flex justify-between text-xl font-serif text-primary pt-4 border-t border-border">
                   <span>{t("cart.total")}</span>
-                  <span>${getCartTotal().toFixed(2)}</span>
+                  <span>{getCartTotal().toFixed(2)} {t("product.currency")}</span>
                 </div>
               </div>
               <Link href="/checkout">

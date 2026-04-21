@@ -53,7 +53,8 @@
     "freeShipping": "شحن مجاني عالمي",
     "returns": "إرجاع خلال 30 يوم",
     "youMayAlsoLike": "قد يعجبك أيضاً",
-    "sale": "تخفيض"
+    "sale": "تخفيض",
+    "currency": "ج.م"
   },
   "cart": {
     "title": "سلة التسوق",

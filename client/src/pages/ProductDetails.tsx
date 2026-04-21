@@ -79,12 +79,12 @@ export default function ProductDetails() {
               <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">{product.name}</h1>
               {product.discountPrice ? (
                 <div className="flex items-center gap-4 mb-8">
-                  <span className="text-3xl font-serif text-primary">${Number(product.discountPrice).toFixed(2)}</span>
-                  <span className="text-xl text-muted-foreground line-through">${Number(product.price).toFixed(2)}</span>
+                  <span className="text-3xl font-serif text-primary">{Number(product.discountPrice).toFixed(2)} {t("product.currency")}</span>
+                  <span className="text-xl text-muted-foreground line-through">{Number(product.price).toFixed(2)} {t("product.currency")}</span>
                   <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded uppercase">{t("product.sale")}</span>
                 </div>
               ) : (
-                <p className="text-2xl font-light text-foreground mb-8">${Number(product.price).toFixed(2)}</p>
+                <p className="text-2xl font-light text-foreground mb-8">{Number(product.price).toFixed(2)} {t("product.currency")}</p>
               )}
 
               <div className="prose prose-sm text-muted-foreground font-light mb-8">
