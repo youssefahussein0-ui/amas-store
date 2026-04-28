@@ -63,15 +63,40 @@ export function Navbar() {
 
           {/* Desktop Nav - Left */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.slice(0, 2).map((link) => (
-              <Link
-                key={link.path}
-                href={link.path}
-                className="text-sm font-medium tracking-wide uppercase hover:text-secondary transition-colors duration-300"
-              >
-                {link.name}
-              </Link>
-            ))}
+            <Link
+              href="/"
+              className="text-sm font-medium tracking-wide uppercase hover:text-secondary transition-colors duration-300"
+            >
+              {t("nav.home")}
+            </Link>
+            <Link
+              href="/shop"
+              className="text-sm font-medium tracking-wide uppercase hover:text-secondary transition-colors duration-300"
+            >
+              {t("nav.shopCollection")}
+            </Link>
+            
+            {/* Categories Dropdown */}
+            <div className="relative group">
+              <button className="text-sm font-medium tracking-wide uppercase hover:text-secondary transition-colors duration-300 flex items-center gap-1">
+                {t("admin.sidebar.categories") || "Categories"}
+                <svg className="w-4 h-4 transition-transform group-hover:rotate-180" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+              
+              <div className="absolute top-full left-0 mt-2 w-52 bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top scale-95 group-hover:scale-100 py-2">
+                {categories?.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/shop?category=${c.slug}`}
+                    className="block px-6 py-3 text-sm hover:bg-muted/50 hover:text-secondary transition-colors"
+                  >
+                    {language === "ar" ? c.nameAr : c.nameEn}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </nav>
 
           {/* Logo - Centered */}
@@ -81,28 +106,21 @@ export function Navbar() {
 
           {/* Right Nav */}
           <div className="flex items-center gap-2 md:gap-6">
-            <nav className="hidden md:flex items-center gap-8">
-              {navLinks.slice(2).map((link) => (
-                <Link
-                  key={link.path}
-                  href={link.path}
-                  className="text-sm font-medium tracking-wide uppercase hover:text-secondary transition-colors duration-300"
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </nav>
-
-            {/* Language Toggle - Desktop only (mobile version is in hamburger menu) */}
-            <button
-              onClick={toggleLanguage}
-              className="hidden md:flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase hover:text-secondary transition-colors duration-300 py-1.5 px-3 border border-border rounded-full hover-elevate"
-              data-testid="lang-toggle"
-              title={language === "en" ? "العربية" : "English"}
-            >
-              <Globe className="w-4 h-4" />
-              <span>{language === "en" ? "AR" : "EN"}</span>
-            </button>
+            <div className="hidden md:flex items-center gap-8">
+              {/* Language Toggle - Desktop only */}
+              <button
+                onClick={toggleLanguage}
+                className="flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase hover:text-secondary transition-colors duration-300 py-1.5 px-3 border border-border rounded-full hover-elevate"
+                title={language === "en" ? "العربية" : "English"}
+              >
+                <Globe className="w-4 h-4" />
+                <span>{language === "en" ? "AR" : "EN"}</span>
+              </button>
+              
+              <Link href="/admin/login" className="text-xs font-medium tracking-wide uppercase hover:text-secondary transition-colors duration-300 py-1 px-3 border border-border rounded hover-elevate">
+                {t("nav.admin")}
+              </Link>
+            </div>
             
             <Link href="/cart" className="relative group p-2 cursor-pointer">
               <ShoppingBag className="w-5 h-5 group-hover:text-secondary transition-colors" />
@@ -111,14 +129,6 @@ export function Navbar() {
                   {cartCount}
                 </span>
               )}
-            </Link>
-
-            <Link 
-              href="/admin/login" 
-              className="hidden md:block text-xs font-medium tracking-wide uppercase hover:text-secondary transition-colors duration-300 py-1 px-3 border border-border rounded hover-elevate"
-              data-testid="link-admin"
-            >
-              {t("nav.admin")}
             </Link>
           </div>
         </div>
