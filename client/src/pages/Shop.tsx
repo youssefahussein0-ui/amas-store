@@ -2,7 +2,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useProducts } from "@/hooks/use-products";
-import { useSearch } from "wouter";
+import { useSearch, useLocation } from "wouter";
 import { useState, useMemo, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -12,6 +12,7 @@ export default function Shop() {
   const { data: products, isLoading } = useProducts();
   const { data: categories } = useCategories();
   const searchString = useSearch();
+  const [location, setLocation] = useLocation();
   const searchParams = new URLSearchParams(searchString);
   const categoryQuery = searchParams.get("category");
   const { t, language } = useLanguage();
@@ -21,6 +22,15 @@ export default function Shop() {
   useEffect(() => {
     setActiveCategory(categoryQuery || "All");
   }, [categoryQuery]);
+
+  const handleCategoryClick = (key: string) => {
+    setActiveCategory(key);
+    if (key === "All") {
+      setLocation("/shop");
+    } else {
+      setLocation(`/shop?category=${key}`);
+    }
+  };
 
   const categoryMap = useMemo(() => {
     const base = [{ key: "All", label: t("categories.all") }];
@@ -66,7 +76,7 @@ export default function Shop() {
             {categoryMap.map((cat) => (
               <button
                 key={cat.key}
-                onClick={() => setActiveCategory(cat.key)}
+                onClick={() => handleCategoryClick(cat.key)}
                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
                   activeCategory.toLowerCase() === cat.key.toLowerCase() 
                     ? "bg-primary text-white shadow-lg" 
