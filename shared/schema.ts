@@ -68,6 +68,7 @@ export const categories = pgTable("categories", {
   nameEn: text("name_en").notNull(),
   nameAr: text("name_ar").notNull(),
   imageUrl: text("image_url").notNull(),
+  hasSizes: boolean("has_sizes").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

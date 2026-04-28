@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useCategories } from "@/hooks/use-categories";
 import { convertGoogleDriveLink, cn } from "@/lib/utils";
 
 export default function ProductDetails() {
@@ -16,6 +17,7 @@ export default function ProductDetails() {
   const productId = parseInt(params.id || "0");
   const { data: product, isLoading } = useProduct(productId);
   const { data: allProducts } = useProducts();
+  const { data: categories } = useCategories();
   const addItem = useCart(state => state.addItem);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
@@ -161,7 +163,7 @@ export default function ProductDetails() {
               </div>
 
               {/* Size Selection */}
-              {(product.category.toLowerCase() === "clothing" || product.category.toLowerCase() === "shoes" || product.category.toLowerCase() === "jacket") && sizes.length > 0 && (
+              {categories?.find(c => c.slug === product.category)?.hasSizes && sizes.length > 0 && (
                 <div className="mb-8">
                   <h3 className="text-sm uppercase tracking-wider font-semibold mb-3">Select Size</h3>
                   <div className="flex flex-wrap gap-3">

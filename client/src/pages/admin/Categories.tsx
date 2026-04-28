@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { convertGoogleDriveLink } from "@/lib/utils";
@@ -22,11 +23,11 @@ export default function AdminCategories() {
   const [editingCategory, setEditingCategory] = useState<any>(null);
 
   const [formData, setFormData] = useState({
-    slug: "", nameEn: "", nameAr: "", imageUrl: ""
+    slug: "", nameEn: "", nameAr: "", imageUrl: "", hasSizes: false
   });
 
   const resetForm = () => {
-    setFormData({ slug: "", nameEn: "", nameAr: "", imageUrl: "" });
+    setFormData({ slug: "", nameEn: "", nameAr: "", imageUrl: "", hasSizes: false });
     setEditingCategory(null);
   };
 
@@ -37,6 +38,7 @@ export default function AdminCategories() {
       nameEn: category.nameEn,
       nameAr: category.nameAr,
       imageUrl: category.imageUrl,
+      hasSizes: !!category.hasSizes
     });
     setIsFormOpen(true);
   };
@@ -106,6 +108,12 @@ export default function AdminCategories() {
                     <div className="space-y-2">
                       <Label>Image URL (Use GD Link)</Label>
                       <Input required value={formData.imageUrl} onChange={e=>setFormData({...formData, imageUrl: e.target.value})} />
+                    </div>
+                    <div className="flex items-center space-x-2 pt-2">
+                      <Checkbox id="hasSizes" checked={formData.hasSizes} onCheckedChange={(c)=>setFormData({...formData, hasSizes: !!c})} />
+                      <Label htmlFor="hasSizes" className="text-sm font-medium leading-none cursor-pointer">
+                        Enable Sizes for this category (e.g. S, M, L)
+                      </Label>
                     </div>
                   </div>
                   <Button type="submit" disabled={createCategory.isPending || updateCategory.isPending} className="w-full mt-4">
