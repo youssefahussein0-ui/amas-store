@@ -1,12 +1,14 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/shop/ProductCard";
+import { SpinWheel } from "@/components/shop/SpinWheel";
 import { useProducts } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { convertGoogleDriveLink } from "@/lib/utils";
 
 export default function Home() {
   const { data: products, isLoading } = useProducts();
@@ -19,6 +21,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+      <SpinWheel />
 
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -61,7 +64,7 @@ export default function Home() {
               <div className="col-span-4 flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
             ) : categories?.map((cat) => (
               <Link key={cat.id} href={`/shop?category=${cat.slug}`} className="group relative h-[400px] overflow-hidden cursor-pointer">
-                <img src={cat.imageUrl} alt={language === 'ar' ? cat.nameAr : cat.nameEn} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                <img src={convertGoogleDriveLink(cat.imageUrl)} alt={language === 'ar' ? cat.nameAr : cat.nameEn} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <h3 className="text-white text-3xl font-serif tracking-wider">{language === 'ar' ? cat.nameAr : cat.nameEn}</h3>

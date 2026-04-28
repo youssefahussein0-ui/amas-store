@@ -5,13 +5,14 @@ import { type Product } from '@shared/schema';
 export interface CartItem {
   product: Product;
   quantity: number;
+  size?: string;
 }
 
 interface CartStore {
   items: CartItem[];
-  addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  addItem: (product: Product, quantity?: number, size?: string) => void;
+  removeItem: (productId: number, size?: string) => void;
+  updateQuantity: (productId: number, quantity: number, size?: string) => void;
   clearCart: () => void;
   getCartTotal: () => number;
   getCartCount: () => number;
@@ -22,36 +23,42 @@ export const useCart = create<CartStore>()(
     (set, get) => ({
       items: [],
       
-      addItem: (product, quantity = 1) => {
+      addItem: (product, quantity = 1, size) => {
         set((state) => {
-          const existingItem = state.items.find((item) => item.product.id === product.id);
+          const existingItem = state.items.find(
+            (item) => item.product.id === product.id && item.size === size
+          );
           if (existingItem) {
             return {
               items: state.items.map((item) =>
-                item.product.id === product.id
+                item.product.id === product.id && item.size === size
                   ? { ...item, quantity: item.quantity + quantity }
                   : item
               ),
             };
           }
-          return { items: [...state.items, { product, quantity }] };
+          return { items: [...state.items, { product, quantity, size }] };
         });
       },
 
-      removeItem: (productId) => {
+      removeItem: (productId, size) => {
         set((state) => ({
-          items: state.items.filter((item) => item.product.id !== productId),
+          items: state.items.filter(
+            (item) => !(item.product.id === productId && item.size === size)
+          ),
         }));
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (productId, quantity, size) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(productId, size);
           return;
         }
         set((state) => ({
           items: state.items.map((item) =>
-            item.product.id === productId ? { ...item, quantity } : item
+            item.product.id === productId && item.size === size 
+              ? { ...item, quantity } 
+              : item
           ),
         }));
       },

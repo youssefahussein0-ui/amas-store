@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { convertGoogleDriveLink } from "@/lib/utils";
+import { convertGoogleDriveLink, validateEgyptianPhone } from "@/lib/utils";
 
 export default function Checkout() {
   const { items, getCartTotal, clearCart } = useCart();
@@ -53,6 +53,15 @@ export default function Checkout() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!validateEgyptianPhone(formData.phone)) {
+      toast({
+        title: t("admin.login.error"),
+        description: "Please enter a valid Egyptian phone number (e.g., 01012345678)",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     createOrder.mutate({
       customerName: formData.name,
       customerPhone: formData.phone,
@@ -62,7 +71,8 @@ export default function Checkout() {
       items: items.map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
-        price: item.product.price
+        price: item.product.price,
+        size: item.size || null
       }))
     }, {
       onSuccess: () => {
@@ -109,14 +119,21 @@ export default function Checkout() {
                   
                   <div className="space-y-2">
                     <Label htmlFor="phone">{t("checkout.phoneNumber")}</Label>
-                    <Input 
-                      id="phone" 
-                      required 
-                      type="tel"
-                      value={formData.phone}
-                      onChange={e => setFormData({...formData, phone: e.target.value})}
-                      className="bg-background focus-visible:ring-primary" 
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-2 text-sm text-muted-foreground border-e pe-2">
+                        <span className="text-base">🇪🇬</span> +20
+                      </span>
+                      <Input 
+                        id="phone" 
+                        required 
+                        type="tel"
+                        placeholder="01xxxxxxxxx"
+                        value={formData.phone}
+                        onChange={e => setFormData({...formData, phone: e.target.value})}
+                        className="bg-background focus-visible:ring-primary ps-20" 
+                      />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">Must be a valid Egyptian number (11 digits)</p>
                   </div>
                   
                   <div className="space-y-2">

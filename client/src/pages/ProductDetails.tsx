@@ -4,12 +4,12 @@ import { Footer } from "@/components/layout/Footer";
 import { useProduct, useProducts } from "@/hooks/use-products";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, ShieldCheck, Truck, RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { Loader2, ShoppingCart, ShieldCheck, Truck, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { convertGoogleDriveLink } from "@/lib/utils";
+import { convertGoogleDriveLink, cn } from "@/lib/utils";
 
 export default function ProductDetails() {
   const params = useParams();
@@ -19,14 +19,35 @@ export default function ProductDetails() {
   const addItem = useCart(state => state.addItem);
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [activeImage, setActiveImage] = useState<string>("");
   const { t } = useLanguage();
+
+  useEffect(() => {
+    if (product) {
+      setActiveImage(product.imageUrl);
+      // Set first size as default if available
+      if (product.sizes) {
+        const sizes = product.sizes.split(",").map(s => s.trim());
+        if (sizes.length > 0) setSelectedSize(sizes[0]);
+      }
+    }
+  }, [product]);
 
   const handleAddToCart = () => {
     if (product) {
-      addItem(product, quantity);
+      if (product.sizes && !selectedSize) {
+        toast({
+          title: t("admin.login.error"),
+          description: "Please select a size",
+          variant: "destructive"
+        });
+        return;
+      }
+      addItem(product, quantity, selectedSize);
       toast({
         title: t("product.addedToCart"),
-        description: `${quantity}x ${product.name} ${t("product.addedToCartDesc")}`,
+        description: `${quantity}x ${product.name} ${selectedSize ? `(${selectedSize})` : ""} ${t("product.addedToCartDesc")}`,
         className: "bg-primary text-primary-foreground border-none",
       });
     }
@@ -56,6 +77,9 @@ export default function ProductDetails() {
     );
   }
 
+  const allImages = [product.imageUrl, ...(product.additionalImages ? product.additionalImages.split(",") : [])].filter(Boolean);
+  const sizes = product.sizes ? product.sizes.split(",").map(s => s.trim()) : [];
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
@@ -66,9 +90,51 @@ export default function ProductDetails() {
             
             {/* Image Gallery */}
             <div className="space-y-4">
-              <div className="aspect-[4/5] bg-muted/20 rounded-xl overflow-hidden shadow-xl">
-                <img src={convertGoogleDriveLink(product.imageUrl)} alt={product.name} className="w-full h-full object-cover" />
+              <div className="aspect-[4/5] bg-muted/20 rounded-xl overflow-hidden shadow-xl relative group">
+                <img 
+                  src={convertGoogleDriveLink(activeImage)} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" 
+                />
+                {allImages.length > 1 && (
+                  <>
+                    <button 
+                      onClick={() => {
+                        const idx = allImages.indexOf(activeImage);
+                        setActiveImage(allImages[(idx - 1 + allImages.length) % allImages.length]);
+                      }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={() => {
+                        const idx = allImages.indexOf(activeImage);
+                        setActiveImage(allImages[(idx + 1) % allImages.length]);
+                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
               </div>
+              {allImages.length > 1 && (
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                  {allImages.map((img, i) => (
+                    <button 
+                      key={i} 
+                      onClick={() => setActiveImage(img)}
+                      className={cn(
+                        "w-20 h-24 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0",
+                        activeImage === img ? "border-primary shadow-md" : "border-transparent opacity-60 hover:opacity-100"
+                      )}
+                    >
+                      <img src={convertGoogleDriveLink(img)} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Product Info */}
@@ -93,6 +159,29 @@ export default function ProductDetails() {
                   <p><strong>{t("product.materials")}:</strong> {product.materials}</p>
                 )}
               </div>
+
+              {/* Size Selection */}
+              {sizes.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm uppercase tracking-wider font-semibold mb-3">Select Size</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {sizes.map(size => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={cn(
+                          "min-w-[3rem] h-12 flex items-center justify-center border transition-all",
+                          selectedSize === size 
+                            ? "border-primary bg-primary text-white shadow-lg" 
+                            : "border-border hover:border-primary"
+                        )}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center gap-6 mb-8 border-y border-border py-6">
                 <div className="flex items-center border border-input rounded-md">

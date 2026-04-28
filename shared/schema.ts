@@ -14,6 +14,8 @@ export const products = pgTable("products", {
   isBestSeller: boolean("is_best_seller").default(false),
   materials: text("materials"),
   discountPrice: numeric("discount_price"),
+  additionalImages: text("additional_images"), // JSON array of strings
+  sizes: text("sizes"), // JSON array of strings or comma-separated
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -42,6 +44,7 @@ export const orderItems = pgTable("order_items", {
   productId: integer("product_id").notNull(),
   quantity: integer("quantity").notNull(),
   price: numeric("price").notNull(),
+  size: text("size"),
 });
 
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true });

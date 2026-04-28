@@ -24,3 +24,9 @@ export function convertGoogleDriveLink(url: string | null | undefined): string {
   }
   return url;
 }
+
+export function validateEgyptianPhone(phone: string): boolean {
+  // Egyptian phone numbers: 010, 011, 012, 015 followed by 8 digits
+  const regex = /^(010|011|012|015)[0-9]{8}$/;
+  return regex.test(phone);
+}

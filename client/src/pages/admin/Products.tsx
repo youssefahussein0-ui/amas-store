@@ -33,11 +33,12 @@ export default function AdminProducts() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
-    name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: ""
+    name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: "",
+    additionalImages: "", sizes: ""
   });
 
   const resetForm = () => {
-    setFormData({ name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: "" });
+    setFormData({ name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: "", additionalImages: "", sizes: "" });
     setEditingProduct(null);
   };
 
@@ -53,7 +54,9 @@ export default function AdminProducts() {
       isNew: !!product.isNew,
       isBestSeller: !!product.isBestSeller,
       materials: product.materials || "",
-      discountPrice: product.discountPrice ? String(product.discountPrice) : ""
+      discountPrice: product.discountPrice ? String(product.discountPrice) : "",
+      additionalImages: product.additionalImages || "",
+      sizes: product.sizes || ""
     });
     setIsFormOpen(true);
   };
@@ -65,6 +68,8 @@ export default function AdminProducts() {
       price: formData.price,
       discountPrice: formData.discountPrice || null,
       imageUrl: convertGoogleDriveLink(formData.imageUrl),
+      additionalImages: formData.additionalImages.split(/[\n,]/).map(s => convertGoogleDriveLink(s.trim())).filter(Boolean).join(","),
+      sizes: formData.sizes,
     };
 
     if (editingProduct) {
@@ -314,6 +319,14 @@ export default function AdminProducts() {
                     <div className="col-span-2 space-y-2">
                       <Label>{t("admin.products.materials")}</Label>
                       <Input value={formData.materials} onChange={e=>setFormData({...formData, materials: e.target.value})} />
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                      <Label>Additional Images (URLs, one per line or comma separated)</Label>
+                      <textarea className="w-full border-border rounded-md p-2 h-24" value={formData.additionalImages} onChange={e=>setFormData({...formData, additionalImages: e.target.value})} />
+                    </div>
+                    <div className="col-span-2 space-y-2">
+                      <Label>Sizes (Comma separated, e.g. S, M, L or 38, 39, 40)</Label>
+                      <Input placeholder="S, M, L, XL" value={formData.sizes} onChange={e=>setFormData({...formData, sizes: e.target.value})} />
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="isNew" checked={formData.isNew} onCheckedChange={(c)=>setFormData({...formData, isNew: !!c})} />

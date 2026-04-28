@@ -32,7 +32,7 @@ export default function Cart() {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
               {items.map(item => (
-                <div key={item.product.id} className="flex gap-6 bg-white p-6 rounded-xl luxury-shadow">
+                <div key={item.product.id + (item.size || '')} className="flex gap-6 bg-white p-6 rounded-xl luxury-shadow">
                   <img 
                     src={convertGoogleDriveLink(item.product.imageUrl)} 
                     alt={item.product.name} 
@@ -40,24 +40,27 @@ export default function Cart() {
                   />
                   <div className="flex-1">
                     <h3 className="font-serif text-lg text-primary">{item.product.name}</h3>
-                    <p className="text-muted-foreground text-sm">{item.product.category}</p>
+                    <div className="flex gap-4 text-muted-foreground text-sm">
+                      <p>{item.product.category}</p>
+                      {item.size && <p className="border-s ps-4 font-medium text-secondary">Size: {item.size}</p>}
+                    </div>
                     <p className="font-medium mt-2">{Number(item.product.price).toFixed(2)} {t("product.currency")}</p>
                   </div>
                   <div className="flex flex-col items-end justify-between">
                     <button 
-                      onClick={() => removeItem(item.product.id)}
+                      onClick={() => removeItem(item.product.id, item.size)}
                       className="text-muted-foreground hover:text-destructive transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <div className="flex items-center border border-input rounded-md">
                       <button 
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.size)}
                         className="px-3 py-1 hover:text-primary transition-colors"
                       >-</button>
                       <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
                       <button 
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.size)}
                         className="px-3 py-1 hover:text-primary transition-colors"
                       >+</button>
                     </div>

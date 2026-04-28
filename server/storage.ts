@@ -9,7 +9,7 @@ export interface IStorage {
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
   getOrders(): Promise<OrderWithItems[]>;
-  createOrder(order: InsertOrder, items: {productId: number, quantity: number, price: string | number}[]): Promise<Order>;
+  createOrder(order: InsertOrder, items: {productId: number, quantity: number, price: string | number, size?: string | null}[]): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
   getAdminStats(): Promise<{totalOrders: number, totalRevenue: number, totalProducts: number}>;
   getAdminByUsername(username: string): Promise<AdminUser | undefined>;
@@ -58,10 +58,16 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async createOrder(insertOrder: InsertOrder, items: {productId: number, quantity: number, price: string | number}[]): Promise<Order> {
+  async createOrder(insertOrder: InsertOrder, items: {productId: number, quantity: number, price: string | number, size?: string | null}[]): Promise<Order> {
     const [order] = await db.insert(orders).values(insertOrder).returning();
     for (const item of items) {
-      await db.insert(orderItems).values({ orderId: order.id, productId: item.productId, quantity: item.quantity, price: String(item.price) });
+      await db.insert(orderItems).values({ 
+        orderId: order.id, 
+        productId: item.productId, 
+        quantity: item.quantity, 
+        price: String(item.price),
+        size: item.size || null
+      });
     }
     return order;
   }

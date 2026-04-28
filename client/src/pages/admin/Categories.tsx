@@ -134,7 +134,7 @@ export default function AdminCategories() {
                 {categories?.map(cat => (
                   <tr key={cat.id} className="border-b border-border/50 hover:bg-muted/10 transition-colors">
                     <td className="px-6 py-4">
-                      <img src={cat.imageUrl} alt={cat.nameEn} className="w-16 h-16 rounded object-cover" />
+                      <img src={convertGoogleDriveLink(cat.imageUrl)} alt={cat.nameEn} className="w-16 h-16 rounded object-cover" />
                     </td>
                     <td className="px-6 py-4">{cat.slug}</td>
                     <td className="px-6 py-4 font-medium">{cat.nameEn}</td>
