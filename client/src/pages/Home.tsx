@@ -11,6 +11,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useCategories } from "@/hooks/use-categories";
 import { convertGoogleDriveLink } from "@/lib/utils";
 import logoImg from "@assets/logo_gold.png";
+import heroBg from "@assets/hero_bg.jpg";
 
 export default function Home() {
   const { data: products, isLoading } = useProducts();
@@ -29,7 +30,7 @@ export default function Home() {
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=2000" 
+            src={heroBg} 
             alt="Hero background" 
             className="w-full h-full object-cover"
           />
