@@ -131,10 +131,8 @@ export default function Checkout() {
                         maxLength={11}
                         value={formData.phone}
                         onChange={e => {
-                          const value = e.target.value.replace(/\D/g, ""); // Only numbers
-                          if (value.length <= 11) {
-                            setFormData({...formData, phone: value});
-                          }
+                          const val = e.target.value.replace(/\D/g, "").slice(0, 11);
+                          setFormData(prev => ({ ...prev, phone: val }));
                         }}
                         className="bg-background focus-visible:ring-primary ps-20" 
                       />
