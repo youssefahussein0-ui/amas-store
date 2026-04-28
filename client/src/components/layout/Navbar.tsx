@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useCategories } from "@/hooks/use-categories";
 import logoImg from "@assets/image_1772919891991.png";
 
 export function Navbar() {
