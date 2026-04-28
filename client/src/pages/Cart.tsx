@@ -80,9 +80,15 @@ export default function Cart() {
                   <span>{t("cart.shipping")}</span>
                   <span>{t("cart.free")}</span>
                 </div>
+                {useCart.getState().appliedDiscount && (
+                  <div className="flex justify-between text-green-600 font-medium">
+                    <span>Discount ({useCart.getState().appliedDiscount}%)</span>
+                    <span>-{(getCartTotal() * (useCart.getState().appliedDiscount || 0) / 100).toFixed(2)} {t("product.currency")}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-xl font-serif text-primary pt-4 border-t border-border">
                   <span>{t("cart.total")}</span>
-                  <span>{getCartTotal().toFixed(2)} {t("product.currency")}</span>
+                  <span>{useCart.getState().getDiscountedTotal().toFixed(2)} {t("product.currency")}</span>
                 </div>
               </div>
               <Link href="/checkout">

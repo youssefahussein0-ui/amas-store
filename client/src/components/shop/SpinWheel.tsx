@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/lib/i18n/LanguageContext';
 import { cn } from '@/lib/utils';
+import { useCart } from '@/hooks/use-cart';
+import { useToast } from '@/hooks/use-toast';
 
 const segments = [
   { label: '10% OFF', color: '#8B5E3C' },
@@ -18,6 +20,8 @@ const segments = [
 ];
 
 export function SpinWheel() {
+  const { toast } = useToast();
+  const setDiscount = useCart(state => state.setDiscount);
   const [isOpen, setIsOpen] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -54,6 +58,16 @@ export function SpinWheel() {
       const segmentIndex = Math.floor((360 - (actualRotation % 360)) / (360 / segments.length)) % segments.length;
       const prizeLabel = segments[segmentIndex].label;
       setResult(prizeLabel);
+
+      // Apply discount automatically if it's a percentage
+      if (prizeLabel.includes('% OFF')) {
+        const discountValue = parseInt(prizeLabel.split('%')[0]);
+        setDiscount(discountValue);
+        toast({
+          title: "Congratulations!",
+          description: `A ${discountValue}% discount has been automatically applied to your cart.`,
+        });
+      }
 
       // Save lead to database
       try {

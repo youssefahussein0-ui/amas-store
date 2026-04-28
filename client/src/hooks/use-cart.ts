@@ -10,18 +10,22 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
+  appliedDiscount: number | null; // percentage e.g. 10
   addItem: (product: Product, quantity?: number, size?: string) => void;
   removeItem: (productId: number, size?: string) => void;
   updateQuantity: (productId: number, quantity: number, size?: string) => void;
   clearCart: () => void;
   getCartTotal: () => number;
+  getDiscountedTotal: () => number;
   getCartCount: () => number;
+  setDiscount: (discount: number | null) => void;
 }
 
 export const useCart = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      appliedDiscount: null,
       
       addItem: (product, quantity = 1, size) => {
         set((state) => {
@@ -63,7 +67,7 @@ export const useCart = create<CartStore>()(
         }));
       },
 
-      clearCart: () => set({ items: [] }),
+      clearCart: () => set({ items: [], appliedDiscount: null }),
 
       getCartTotal: () => {
         return get().items.reduce(
@@ -72,9 +76,20 @@ export const useCart = create<CartStore>()(
         );
       },
 
+      getDiscountedTotal: () => {
+        const total = get().getCartTotal();
+        const discount = get().appliedDiscount;
+        if (discount) {
+          return total * (1 - discount / 100);
+        }
+        return total;
+      },
+
       getCartCount: () => {
         return get().items.reduce((count, item) => count + item.quantity, 0);
       },
+
+      setDiscount: (discount) => set({ appliedDiscount: discount }),
     }),
     {
       name: 'amas-cart-storage',

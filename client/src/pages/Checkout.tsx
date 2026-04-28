@@ -14,7 +14,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { convertGoogleDriveLink, validateEgyptianPhone } from "@/lib/utils";
 
 export default function Checkout() {
-  const { items, getCartTotal, clearCart } = useCart();
+  const { items, getCartTotal, getDiscountedTotal, clearCart, appliedDiscount } = useCart();
   const createOrder = useCreateOrder();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -67,7 +67,7 @@ export default function Checkout() {
       customerPhone: formData.phone,
       customerAddress: formData.address,
       paymentMethod: formData.paymentMethod,
-      totalAmount: getCartTotal(),
+      totalAmount: getDiscountedTotal(),
       items: items.map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -209,9 +209,15 @@ export default function Checkout() {
                   <span>{t("checkout.shipping")}</span>
                   <span>{t("checkout.free")}</span>
                 </div>
+                {appliedDiscount && (
+                  <div className="flex justify-between text-green-600 font-medium">
+                    <span>Discount ({appliedDiscount}%)</span>
+                    <span>-{(getCartTotal() * appliedDiscount / 100).toFixed(2)} {t("product.currency")}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-xl font-serif text-primary pt-4">
                   <span>{t("checkout.total")}</span>
-                  <span>{getCartTotal().toFixed(2)} {t("product.currency")}</span>
+                  <span>{getDiscountedTotal().toFixed(2)} {t("product.currency")}</span>
                 </div>
               </div>
             </div>
