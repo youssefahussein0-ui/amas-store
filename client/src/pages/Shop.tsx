@@ -18,6 +18,10 @@ export default function Shop() {
 
   const [activeCategory, setActiveCategory] = useState<string>(categoryQuery || "All");
 
+  useEffect(() => {
+    setActiveCategory(categoryQuery || "All");
+  }, [categoryQuery]);
+
   const categoryMap = useMemo(() => {
     const base = [{ key: "All", label: t("categories.all") }];
     if (!categories) return base;
@@ -64,7 +68,7 @@ export default function Shop() {
                 key={cat.key}
                 onClick={() => setActiveCategory(cat.key)}
                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                  activeCategory === cat.key 
+                  activeCategory.toLowerCase() === cat.key.toLowerCase() 
                     ? "bg-primary text-white shadow-lg" 
                     : "bg-white text-foreground hover:bg-muted"
                 }`}
