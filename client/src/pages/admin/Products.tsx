@@ -2,7 +2,7 @@ import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import { useProducts, useCreateProduct, useDeleteProduct, useUpdateProduct } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
 import { useState, useRef } from "react";
-import { Plus, Edit, Trash2, Loader2, Upload, Download, FileSpreadsheet, X } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Upload, Download, FileSpreadsheet, X, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,7 @@ export default function AdminProducts() {
   const [uploadResult, setUploadResult] = useState<{ inserted: number; errors: string[] } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [formData, setFormData] = useState({
     name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: "",
@@ -175,6 +176,11 @@ export default function AdminProducts() {
     }
   };
 
+  const filteredProducts = products?.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    p.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
@@ -183,7 +189,16 @@ export default function AdminProducts() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-serif text-primary">{t("admin.products.title")}</h1>
           
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search products..." 
+                className="pl-10 w-64 bg-white"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
             {/* Upload File Button */}
             <Dialog open={isUploadOpen} onOpenChange={(open) => { setIsUploadOpen(open); if (!open) { setSelectedFile(null); setUploadResult(null); } }}>
               <DialogTrigger asChild>
@@ -363,7 +378,7 @@ export default function AdminProducts() {
                 </tr>
               </thead>
               <tbody>
-                {products?.map(p => (
+                {filteredProducts?.map(p => (
                   <tr key={p.id} className="border-b border-border/50 hover:bg-muted/10 transition-colors">
                     <td className="px-6 py-4 flex items-center gap-3">
                       <img src={convertGoogleDriveLink(p.imageUrl)} alt={p.name} className="w-10 h-10 rounded object-cover" />
