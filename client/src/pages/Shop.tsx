@@ -49,12 +49,12 @@ export default function Shop() {
     if (activeCategory === "All") return products;
     
     // Find the category name associated with the slug (activeCategory)
-    const categoryObj = categories?.find(c => c.slug === activeCategory);
+    const categoryObj = categories?.find(c => c.slug.trim().toLowerCase() === activeCategory.trim().toLowerCase());
     const targetCategoryName = categoryObj ? categoryObj.nameEn : activeCategory;
 
     return products.filter(p => 
-      p.category.toLowerCase() === targetCategoryName.toLowerCase() ||
-      p.category.toLowerCase() === activeCategory.toLowerCase()
+      p.category.trim().toLowerCase() === targetCategoryName.trim().toLowerCase() ||
+      p.category.trim().toLowerCase() === activeCategory.trim().toLowerCase()
     );
   }, [products, activeCategory, categories]);
 
@@ -78,7 +78,7 @@ export default function Shop() {
                 key={cat.key}
                 onClick={() => handleCategoryClick(cat.key)}
                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                  activeCategory.toLowerCase() === cat.key.toLowerCase() 
+                  activeCategory.trim().toLowerCase() === cat.key.trim().toLowerCase() 
                     ? "bg-primary text-white shadow-lg" 
                     : "bg-white text-foreground hover:bg-muted"
                 }`}
