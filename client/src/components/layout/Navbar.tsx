@@ -26,6 +26,8 @@ export function Navbar() {
     { name: t("nav.shopCollection"), path: "/shop" },
     { name: t("nav.rings"), path: "/shop?category=Rings" },
     { name: t("nav.necklaces"), path: "/shop?category=Necklaces" },
+    { name: "Clothing", path: "/shop?category=Clothing" },
+    { name: "Shoes", path: "/shop?category=Shoes" },
   ];
 
   const toggleLanguage = () => {

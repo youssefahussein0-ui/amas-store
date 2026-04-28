@@ -22,6 +22,8 @@ export default function Shop() {
     { key: "Necklaces", label: t("categories.necklaces") },
     { key: "Bracelets", label: t("categories.bracelets") },
     { key: "Earrings", label: t("categories.earrings") },
+    { key: "Clothing", label: "Clothing" },
+    { key: "Shoes", label: "Shoes" },
   ];
 
   const filteredProducts = useMemo(() => {
