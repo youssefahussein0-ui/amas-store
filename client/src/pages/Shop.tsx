@@ -33,8 +33,16 @@ export default function Shop() {
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     if (activeCategory === "All") return products;
-    return products.filter(p => p.category === activeCategory);
-  }, [products, activeCategory]);
+    
+    // Find the category name associated with the slug (activeCategory)
+    const categoryObj = categories?.find(c => c.slug === activeCategory);
+    const targetCategoryName = categoryObj ? categoryObj.nameEn : activeCategory;
+
+    return products.filter(p => 
+      p.category.toLowerCase() === targetCategoryName.toLowerCase() ||
+      p.category.toLowerCase() === activeCategory.toLowerCase()
+    );
+  }, [products, activeCategory, categories]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
