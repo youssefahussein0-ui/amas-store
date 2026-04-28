@@ -128,8 +128,14 @@ export default function Checkout() {
                         required 
                         type="tel"
                         placeholder="01xxxxxxxxx"
+                        maxLength={11}
                         value={formData.phone}
-                        onChange={e => setFormData({...formData, phone: e.target.value})}
+                        onChange={e => {
+                          const value = e.target.value.replace(/\D/g, ""); // Only numbers
+                          if (value.length <= 11) {
+                            setFormData({...formData, phone: value});
+                          }
+                        }}
                         className="bg-background focus-visible:ring-primary ps-20" 
                       />
                     </div>
