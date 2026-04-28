@@ -2,6 +2,8 @@ import logoImg from "@assets/image_1772919891991.png";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useCategories } from "@/hooks/use-categories";
 import { Link } from "wouter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Phone, Facebook, Instagram } from "lucide-react";
 
 export function Footer() {
   const { t, language } = useLanguage();
@@ -38,7 +40,45 @@ export function Footer() {
             <ul className="space-y-3 font-light">
               <li><a href="#" className="hover:text-secondary transition-colors">{t("footer.ourStory")}</a></li>
               <li><a href="#" className="hover:text-secondary transition-colors">{t("footer.materialsCare")}</a></li>
-              <li><a href="#" className="hover:text-secondary transition-colors">{t("footer.contactUs")}</a></li>
+              <li>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="hover:text-secondary transition-colors text-start">{t("footer.contactUs")}</button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md bg-white">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-serif text-primary border-b pb-2">{t("footer.contactUs")}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-6 py-4">
+                      <div className="space-y-3">
+                        <h5 className="font-medium flex items-center gap-2 text-primary">
+                          <Phone className="w-4 h-4" /> {language === 'ar' ? 'أرقام الهاتف' : 'Phone Numbers'}
+                        </h5>
+                        <div className="grid grid-cols-1 gap-2 pl-6">
+                          <a href="tel:01002349187" className="hover:text-secondary transition-colors">01002349187</a>
+                          <a href="tel:01003374884" className="hover:text-secondary transition-colors">01003374884</a>
+                          <a href="tel:01150388851" className="hover:text-secondary transition-colors">01150388851</a>
+                          <a href="tel:01001653773" className="hover:text-secondary transition-colors">01001653773</a>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <h5 className="font-medium flex items-center gap-2 text-primary">
+                          {language === 'ar' ? 'تابعنا على' : 'Follow Us'}
+                        </h5>
+                        <div className="flex gap-4 pl-6">
+                          <a href="https://www.facebook.com/share/1LatwaqTkz/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="p-3 bg-muted rounded-full hover:bg-primary hover:text-white transition-all">
+                            <Facebook className="w-5 h-5" />
+                          </a>
+                          <a href="https://www.instagram.com/amasgallery2?igsh=MTk0eXFkNDh1c3hkNg==" target="_blank" rel="noopener noreferrer" className="p-3 bg-muted rounded-full hover:bg-primary hover:text-white transition-all">
+                            <Instagram className="w-5 h-5" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </li>
               <li><Link href="/admin/login" className="hover:text-secondary transition-colors">{t("footer.adminPortal")}</Link></li>
             </ul>
           </div>
