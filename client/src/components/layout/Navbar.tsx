@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { ShoppingBag, Menu, X, Globe } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -12,6 +12,7 @@ export function Navbar() {
   const [location] = useLocation();
   const cartCount = useCart((state) => state.getCartCount());
   const { t, language, setLanguage, isRTL } = useLanguage();
+  const { data: categories } = useCategories();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,14 +22,20 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navLinks = [
-    { name: t("nav.home"), path: "/" },
-    { name: t("nav.shopCollection"), path: "/shop" },
-    { name: t("nav.rings"), path: "/shop?category=Rings" },
-    { name: t("nav.necklaces"), path: "/shop?category=Necklaces" },
-    { name: "Clothing", path: "/shop?category=Clothing" },
-    { name: "Shoes", path: "/shop?category=Shoes" },
-  ];
+  const navLinks = useMemo(() => {
+    const base = [
+      { name: t("nav.home"), path: "/" },
+      { name: t("nav.shopCollection"), path: "/shop" },
+    ];
+    if (!categories) return base;
+    return [
+      ...base,
+      ...categories.map(c => ({
+        name: language === "ar" ? c.nameAr : c.nameEn,
+        path: `/shop?category=${c.slug}`
+      }))
+    ];
+  }, [categories, t, language]);
 
   const toggleLanguage = () => {
     setLanguage(language === "en" ? "ar" : "en");

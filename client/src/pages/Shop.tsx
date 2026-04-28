@@ -6,25 +6,29 @@ import { useSearch } from "wouter";
 import { useState, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useCategories } from "@/hooks/use-categories";
 
 export default function Shop() {
   const { data: products, isLoading } = useProducts();
+  const { data: categories } = useCategories();
   const searchString = useSearch();
   const searchParams = new URLSearchParams(searchString);
   const categoryQuery = searchParams.get("category");
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [activeCategory, setActiveCategory] = useState<string>(categoryQuery || "All");
 
-  const categoryMap = [
-    { key: "All", label: t("categories.all") },
-    { key: "Rings", label: t("categories.rings") },
-    { key: "Necklaces", label: t("categories.necklaces") },
-    { key: "Bracelets", label: t("categories.bracelets") },
-    { key: "Earrings", label: t("categories.earrings") },
-    { key: "Clothing", label: "Clothing" },
-    { key: "Shoes", label: "Shoes" },
-  ];
+  const categoryMap = useMemo(() => {
+    const base = [{ key: "All", label: t("categories.all") }];
+    if (!categories) return base;
+    return [
+      ...base,
+      ...categories.map(c => ({
+        key: c.slug,
+        label: language === "ar" ? c.nameAr : c.nameEn
+      }))
+    ];
+  }, [categories, t, language]);
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];
