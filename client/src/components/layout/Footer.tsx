@@ -1,4 +1,4 @@
-import logoImg from "@assets/image_1772919891991.png";
+import logoImg from "@assets/logo_gold.png";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useCategories } from "@/hooks/use-categories";
 import { Link } from "wouter";
@@ -15,7 +15,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-start">
           
           <div className="flex flex-col items-center md:items-start">
-            <img src={logoImg} alt="Amas" className="h-16 mb-4 filter brightness-0 invert" />
+            <img src={logoImg} alt="Amas" className="h-20 mb-4 object-contain" />
             <p className="text-primary-foreground/80 font-serif italic text-lg max-w-xs">
               {t("footer.tagline")}
             </p>

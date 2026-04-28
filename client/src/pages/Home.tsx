@@ -8,7 +8,9 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useCategories } from "@/hooks/use-categories";
 import { convertGoogleDriveLink } from "@/lib/utils";
+import logoImg from "@assets/logo_gold.png";
 
 export default function Home() {
   const { data: products, isLoading } = useProducts();
@@ -105,8 +107,8 @@ export default function Home() {
       <section className="py-24 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="order-2 lg:order-1">
-              <img src="https://pixabay.com/get/g5ab2c92bda86771dc31b9e26af2905d16b976b260aa21bf07a7ae34785f416d0c65db59bb60e75b17304b2d1bee99e5ee80c89802724fad3cb996dc35051d328_1280.jpg" alt="Handmade jewelry crafting" className="rounded-t-full shadow-2xl" />
+            <div className="order-2 lg:order-1 flex justify-center items-center bg-white/5 backdrop-blur-sm rounded-t-full p-12 border border-white/10 shadow-2xl">
+              <img src={logoImg} alt="Amas Logo" className="w-full max-w-md animate-pulse-slow" />
             </div>
             <div className="order-1 lg:order-2 space-y-8">
               <h2 className="text-4xl md:text-5xl font-serif text-secondary">{t("home.theAmasStory")}</h2>

@@ -5,7 +5,7 @@ import { useCart } from "@/hooks/use-cart";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useCategories } from "@/hooks/use-categories";
-import logoImg from "@assets/image_1772919891991.png";
+import logoImg from "@assets/logo_gold.png";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -101,7 +101,7 @@ export function Navbar() {
 
           {/* Logo - Centered */}
           <Link href="/" className="flex-shrink-0 flex items-center cursor-pointer md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
-            <img src={logoImg} alt="أماس Amas" className="h-10 md:h-12 w-auto object-contain" />
+            <img src={logoImg} alt="أماس Amas" className="h-16 md:h-20 w-auto object-contain transition-transform hover:scale-110 duration-500" />
           </Link>
 
           {/* Right Nav */}
@@ -145,7 +145,7 @@ export function Navbar() {
             className="fixed inset-0 z-[60] bg-background md:hidden"
           >
             <div className="p-5 flex justify-between items-center border-b border-border">
-              <img src={logoImg} alt="أماس" className="h-10" />
+              <img src={logoImg} alt="أماس" className="h-14" />
               <button onClick={() => setMobileMenuOpen(false)}>
                 <X className="w-8 h-8 text-primary" />
               </button>
