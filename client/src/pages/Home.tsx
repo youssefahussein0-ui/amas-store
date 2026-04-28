@@ -11,7 +11,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useCategories } from "@/hooks/use-categories";
 import { convertGoogleDriveLink } from "@/lib/utils";
 import logoImg from "@assets/logo_gold.png";
-import heroBg from "@assets/hero_bg.jpg";
+import heroBg from "@assets/amas2.jpeg";
 
 export default function Home() {
   const { data: products, isLoading } = useProducts();
