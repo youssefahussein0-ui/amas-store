@@ -324,10 +324,12 @@ export default function AdminProducts() {
                       <Label>Additional Images (URLs, one per line or comma separated)</Label>
                       <textarea className="w-full border-border rounded-md p-2 h-24" value={formData.additionalImages} onChange={e=>setFormData({...formData, additionalImages: e.target.value})} />
                     </div>
-                    <div className="col-span-2 space-y-2">
-                      <Label>Sizes (Comma separated, e.g. S, M, L or 38, 39, 40)</Label>
-                      <Input placeholder="S, M, L, XL" value={formData.sizes} onChange={e=>setFormData({...formData, sizes: e.target.value})} />
-                    </div>
+                    {(formData.category === "Clothing" || formData.category === "Shoes") && (
+                      <div className="col-span-2 space-y-2">
+                        <Label>Sizes (Comma separated, e.g. S, M, L or 38, 39, 40)</Label>
+                        <Input placeholder="S, M, L, XL" value={formData.sizes} onChange={e=>setFormData({...formData, sizes: e.target.value})} />
+                      </div>
+                    )}
                     <div className="flex items-center space-x-2">
                       <Checkbox id="isNew" checked={formData.isNew} onCheckedChange={(c)=>setFormData({...formData, isNew: !!c})} />
                       <Label htmlFor="isNew">{t("admin.products.isNew")}</Label>

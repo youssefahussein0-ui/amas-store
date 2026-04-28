@@ -161,7 +161,7 @@ export default function ProductDetails() {
               </div>
 
               {/* Size Selection */}
-              {sizes.length > 0 && (
+              {(product.category === "Clothing" || product.category === "Shoes") && sizes.length > 0 && (
                 <div className="mb-8">
                   <h3 className="text-sm uppercase tracking-wider font-semibold mb-3">Select Size</h3>
                   <div className="flex flex-wrap gap-3">
