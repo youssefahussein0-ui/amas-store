@@ -242,16 +242,21 @@ async function seedDatabase() {
       await storage.createAdmin("admin", await bcrypt.hash("Amas@2026!", 10));
       console.log("✅ Default admin created.");
     }
-    const existingCategories = await storage.getCategories();
-    if (existingCategories.length === 0) {
-      const defaultCategories = [
-        { slug: "Rings", nameEn: "Rings", nameAr: "خواتم", imageUrl: "https://images.unsplash.com/photo-1605100804763-247f67b63f6e?w=800" },
-        { slug: "Necklaces", nameEn: "Necklaces", nameAr: "قلادات", imageUrl: "https://images.unsplash.com/photo-1599643478524-fb66f72400ce?w=800" },
-        { slug: "Bracelets", nameEn: "Bracelets", nameAr: "أساور", imageUrl: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800" },
-        { slug: "Earrings", nameEn: "Earrings", nameAr: "أقراط", imageUrl: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800" },
-      ];
-      for (const cat of defaultCategories) await storage.createCategory(cat);
-      console.log("✅ Default categories seeded.");
+    const defaultCategories = [
+      { slug: "Rings", nameEn: "Rings", nameAr: "خواتم", imageUrl: "https://images.unsplash.com/photo-1605100804763-247f67b63f6e?w=800" },
+      { slug: "Necklaces", nameEn: "Necklaces", nameAr: "قلادات", imageUrl: "https://images.unsplash.com/photo-1599643478524-fb66f72400ce?w=800" },
+      { slug: "Bracelets", nameEn: "Bracelets", nameAr: "أساور", imageUrl: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800" },
+      { slug: "Earrings", nameEn: "Earrings", nameAr: "أقراط", imageUrl: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800" },
+      { slug: "Clothing", nameEn: "Clothing", nameAr: "الملابس", imageUrl: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800" },
+      { slug: "Shoes", nameEn: "Shoes", nameAr: "الأحذية", imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800" },
+    ];
+
+    const currentCategories = await storage.getCategories();
+    for (const cat of defaultCategories) {
+      if (!currentCategories.find(c => c.slug === cat.slug)) {
+        await storage.createCategory(cat);
+        console.log(`✅ Category ${cat.nameEn} seeded.`);
+      }
     }
     const existingProducts = await storage.getProducts();
     if (existingProducts.length === 0) {
