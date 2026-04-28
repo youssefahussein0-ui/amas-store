@@ -1,8 +1,11 @@
 import logoImg from "@assets/image_1772919891991.png";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useCategories } from "@/hooks/use-categories";
+import { Link } from "wouter";
 
 export function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { data: categories } = useCategories();
   
   return (
     <footer className="bg-primary text-primary-foreground pt-16 pb-8 border-t border-primary/20">
@@ -19,10 +22,14 @@ export function Footer() {
           <div>
             <h4 className="font-serif text-xl mb-6 text-secondary">{t("footer.discover")}</h4>
             <ul className="space-y-3 font-light">
-              <li><a href="/shop" className="hover:text-secondary transition-colors">{t("footer.newCollection")}</a></li>
-              <li><a href="/shop?category=Rings" className="hover:text-secondary transition-colors">{t("categories.rings")}</a></li>
-              <li><a href="/shop?category=Necklaces" className="hover:text-secondary transition-colors">{t("categories.necklaces")}</a></li>
-              <li><a href="/shop?category=Bracelets" className="hover:text-secondary transition-colors">{t("categories.bracelets")}</a></li>
+              <li><Link href="/shop" className="hover:text-secondary transition-colors">{t("footer.newCollection")}</Link></li>
+              {categories?.slice(0, 4).map(cat => (
+                <li key={cat.id}>
+                  <Link href={`/shop?category=${cat.slug}`} className="hover:text-secondary transition-colors">
+                    {language === "ar" ? cat.nameAr : cat.nameEn}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -32,7 +39,7 @@ export function Footer() {
               <li><a href="#" className="hover:text-secondary transition-colors">{t("footer.ourStory")}</a></li>
               <li><a href="#" className="hover:text-secondary transition-colors">{t("footer.materialsCare")}</a></li>
               <li><a href="#" className="hover:text-secondary transition-colors">{t("footer.contactUs")}</a></li>
-              <li><a href="/admin" className="hover:text-secondary transition-colors">{t("footer.adminPortal")}</a></li>
+              <li><Link href="/admin/login" className="hover:text-secondary transition-colors">{t("footer.adminPortal")}</Link></li>
             </ul>
           </div>
 
