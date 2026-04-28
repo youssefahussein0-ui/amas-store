@@ -74,3 +74,15 @@ export const categories = pgTable("categories", {
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true, createdAt: true });
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
+
+export const leads = pgTable("leads", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  prize: text("prize").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true });
+export type Lead = typeof leads.$inferSelect;
+export type InsertLead = z.infer<typeof insertLeadSchema>;

@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { products, orders, orderItems, adminUsers, categories, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory } from "@shared/schema";
+import { products, orders, orderItems, adminUsers, categories, leads, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
@@ -19,6 +19,8 @@ export interface IStorage {
   createCategory(category: InsertCategory): Promise<Category>;
   updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category | undefined>;
   deleteCategory(id: number): Promise<boolean>;
+  getLeads(): Promise<Lead[]>;
+  createLead(lead: InsertLead): Promise<Lead>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -119,6 +121,15 @@ export class DatabaseStorage implements IStorage {
   async deleteCategory(id: number): Promise<boolean> {
     const [deleted] = await db.delete(categories).where(eq(categories.id, id)).returning();
     return !!deleted;
+  }
+  
+  async getLeads(): Promise<Lead[]> {
+    return await db.select().from(leads).orderBy(desc(leads.createdAt));
+  }
+
+  async createLead(insertLead: InsertLead): Promise<Lead> {
+    const [lead] = await db.insert(leads).values(insertLead).returning();
+    return lead;
   }
 }
 

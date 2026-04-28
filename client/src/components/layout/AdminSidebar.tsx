@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, Layers } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, Layers, Gift } from "lucide-react";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import logoImg from "@assets/image_1772919891991.png";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -14,6 +14,7 @@ export function AdminSidebar() {
     { name: t("admin.sidebar.categories") || "Categories", path: "/admin/categories", icon: Layers },
     { name: t("admin.sidebar.products"), path: "/admin/products", icon: Package },
     { name: t("admin.sidebar.orders"), path: "/admin/orders", icon: ShoppingCart },
+    { name: "Spin Leads", path: "/admin/leads", icon: Gift },
   ];
 
   const handleLogout = async () => {

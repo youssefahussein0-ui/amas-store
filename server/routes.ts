@@ -231,6 +231,22 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(await storage.getAdminStats());
   });
 
+  app.get(api.admin.leads.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    res.json(await storage.getLeads());
+  });
+
+  app.post(api.leads.create.path, async (req, res) => {
+    try {
+      const input = api.leads.create.input.parse(req.body);
+      const lead = await storage.createLead(input);
+      res.status(201).json(lead);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
   await seedDatabase();
   return httpServer;
 }

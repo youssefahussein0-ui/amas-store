@@ -189,6 +189,28 @@ export const api = {
         200: z.object({ authenticated: z.boolean() }),
       },
     },
+    leads: {
+      method: 'GET' as const,
+      path: '/api/admin/leads' as const,
+      responses: {
+        200: z.array(z.any()),
+      },
+    },
+  },
+  leads: {
+    create: {
+      method: 'POST' as const,
+      path: '/api/leads' as const,
+      input: z.object({
+        email: z.string().email(),
+        phone: z.string(),
+        prize: z.string(),
+      }),
+      responses: {
+        201: z.any(),
+        400: errorSchemas.validation,
+      },
+    },
   }
 };
 

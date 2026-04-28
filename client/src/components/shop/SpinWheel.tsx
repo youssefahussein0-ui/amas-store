@@ -48,11 +48,23 @@ export function SpinWheel() {
     const newRotation = rotation + 1800 + Math.random() * 360; // Spin at least 5 times
     setRotation(newRotation);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsSpinning(false);
       const actualRotation = newRotation % 360;
       const segmentIndex = Math.floor((360 - (actualRotation % 360)) / (360 / segments.length)) % segments.length;
-      setResult(segments[segmentIndex].label);
+      const prizeLabel = segments[segmentIndex].label;
+      setResult(prizeLabel);
+
+      // Save lead to database
+      try {
+        await fetch('/api/leads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, phone, prize: prizeLabel })
+        });
+      } catch (error) {
+        console.error('Failed to save lead:', error);
+      }
     }, 5000);
   };
 

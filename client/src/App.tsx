@@ -19,6 +19,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import Products from "./pages/admin/Products";
 import Categories from "./pages/admin/Categories";
 import Orders from "./pages/admin/Orders";
+import Leads from "./pages/admin/Leads";
 import { ProtectedAdminRoute } from "@/components/layout/ProtectedAdminRoute";
 
 function Router() {
@@ -44,6 +45,9 @@ function Router() {
       </Route>
       <Route path="/admin/orders">
         {() => <ProtectedAdminRoute><Orders /></ProtectedAdminRoute>}
+      </Route>
+      <Route path="/admin/leads">
+        {() => <ProtectedAdminRoute><Leads /></ProtectedAdminRoute>}
       </Route>
 
       {/* Fallback to 404 */}
