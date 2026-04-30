@@ -246,14 +246,10 @@ export default function ProductDetails() {
               </div>
 
               {/* Value Props */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm text-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-center">
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <ShieldCheck className="w-6 h-6 text-secondary" />
                   <span>{t("product.lifetimeWarranty")}</span>
-                </div>
-                <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                  <Truck className="w-6 h-6 text-secondary" />
-                  <span>{t("product.freeShipping")}</span>
                 </div>
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <RefreshCw className="w-6 h-6 text-secondary" />
