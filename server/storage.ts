@@ -9,7 +9,7 @@ export interface IStorage {
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
   getOrders(): Promise<OrderWithItems[]>;
-  createOrder(order: InsertOrder, items: {productId: number, quantity: number, price: string | number, size?: string | null}[]): Promise<Order>;
+  createOrder(order: InsertOrder, items: {productId: number, quantity: number, price: string | number, size?: string | null, color?: string | null}[]): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
   getAdminStats(): Promise<{totalOrders: number, totalRevenue: number, totalProducts: number}>;
   getAdminByUsername(username: string): Promise<AdminUser | undefined>;
@@ -68,7 +68,8 @@ export class DatabaseStorage implements IStorage {
         productId: item.productId, 
         quantity: item.quantity, 
         price: String(item.price),
-        size: item.size || null
+        size: item.size || null,
+        color: item.color || null
       });
     }
     return order;
