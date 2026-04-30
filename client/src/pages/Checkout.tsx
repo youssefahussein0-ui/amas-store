@@ -93,7 +93,8 @@ export default function Checkout() {
         productId: item.product.id,
         quantity: item.quantity,
         price: item.product.price,
-        size: item.size || null
+        size: item.size || null,
+        color: item.color || null
       }))
     }, {
       onSuccess: () => {
@@ -238,7 +239,11 @@ export default function Checkout() {
                     <img src={convertGoogleDriveLink(item.product.imageUrl)} alt={item.product.name} className="w-16 h-16 object-cover rounded" />
                     <div className="flex-1">
                       <h4 className="font-medium">{item.product.name}</h4>
-                      <p className="text-sm text-muted-foreground">{t("checkout.qty")}: {item.quantity}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t("checkout.qty")}: {item.quantity} 
+                        {item.size && ` | Size: ${item.size}`}
+                        {item.color && ` | Color: ${item.color}`}
+                      </p>
                     </div>
                     <p className="font-medium">{(Number(item.product.price) * item.quantity).toFixed(2)} {t("product.currency")}</p>
                   </div>

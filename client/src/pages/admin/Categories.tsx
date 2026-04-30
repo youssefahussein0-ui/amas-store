@@ -23,11 +23,11 @@ export default function AdminCategories() {
   const [editingCategory, setEditingCategory] = useState<any>(null);
 
   const [formData, setFormData] = useState({
-    slug: "", nameEn: "", nameAr: "", imageUrl: "", hasSizes: false
+    slug: "", nameEn: "", nameAr: "", imageUrl: "", hasSizes: false, hasColors: false
   });
 
   const resetForm = () => {
-    setFormData({ slug: "", nameEn: "", nameAr: "", imageUrl: "", hasSizes: false });
+    setFormData({ slug: "", nameEn: "", nameAr: "", imageUrl: "", hasSizes: false, hasColors: false });
     setEditingCategory(null);
   };
 
@@ -38,7 +38,8 @@ export default function AdminCategories() {
       nameEn: category.nameEn,
       nameAr: category.nameAr,
       imageUrl: category.imageUrl,
-      hasSizes: !!category.hasSizes
+      hasSizes: !!category.hasSizes,
+      hasColors: !!category.hasColors
     });
     setIsFormOpen(true);
   };
@@ -113,6 +114,12 @@ export default function AdminCategories() {
                       <Checkbox id="hasSizes" checked={formData.hasSizes} onCheckedChange={(c)=>setFormData({...formData, hasSizes: !!c})} />
                       <Label htmlFor="hasSizes" className="text-sm font-medium leading-none cursor-pointer">
                         Enable Sizes for this category (e.g. S, M, L)
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 pt-2">
+                      <Checkbox id="hasColors" checked={formData.hasColors} onCheckedChange={(c)=>setFormData({...formData, hasColors: !!c})} />
+                      <Label htmlFor="hasColors" className="text-sm font-medium leading-none cursor-pointer">
+                        Enable Colors for this category
                       </Label>
                     </div>
                   </div>

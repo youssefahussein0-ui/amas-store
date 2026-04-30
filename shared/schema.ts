@@ -16,6 +16,7 @@ export const products = pgTable("products", {
   discountPrice: numeric("discount_price"),
   additionalImages: text("additional_images"), // JSON array of strings
   sizes: text("sizes"), // JSON array of strings or comma-separated
+  colors: text("colors"), // JSON array of strings or comma-separated
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -45,6 +46,7 @@ export const orderItems = pgTable("order_items", {
   quantity: integer("quantity").notNull(),
   price: numeric("price").notNull(),
   size: text("size"),
+  color: text("color"),
 });
 
 export const insertOrderItemSchema = createInsertSchema(orderItems).omit({ id: true });
@@ -69,6 +71,7 @@ export const categories = pgTable("categories", {
   nameAr: text("name_ar").notNull(),
   imageUrl: text("image_url").notNull(),
   hasSizes: boolean("has_sizes").default(false),
+  hasColors: boolean("has_colors").default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

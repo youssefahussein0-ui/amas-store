@@ -35,11 +35,11 @@ export default function AdminProducts() {
 
   const [formData, setFormData] = useState({
     name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: "",
-    additionalImages: "", sizes: ""
+    additionalImages: "", sizes: "", colors: ""
   });
 
   const resetForm = () => {
-    setFormData({ name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: "", additionalImages: "", sizes: "" });
+    setFormData({ name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: "", additionalImages: "", sizes: "", colors: "" });
     setEditingProduct(null);
   };
 
@@ -57,7 +57,8 @@ export default function AdminProducts() {
       materials: product.materials || "",
       discountPrice: product.discountPrice ? String(product.discountPrice) : "",
       additionalImages: product.additionalImages || "",
-      sizes: product.sizes || ""
+      sizes: product.sizes || "",
+      colors: product.colors || ""
     });
     setIsFormOpen(true);
   };
@@ -71,6 +72,7 @@ export default function AdminProducts() {
       imageUrl: convertGoogleDriveLink(formData.imageUrl),
       additionalImages: formData.additionalImages.split(/[\n,]/).map(s => convertGoogleDriveLink(s.trim())).filter(Boolean).join(","),
       sizes: formData.sizes,
+      colors: formData.colors,
     };
 
     if (editingProduct) {
@@ -343,6 +345,12 @@ export default function AdminProducts() {
                       <div className="col-span-2 space-y-2">
                         <Label>Sizes (Comma separated, e.g. S, M, L or 38, 39, 40)</Label>
                         <Input placeholder="S, M, L, XL" value={formData.sizes} onChange={e=>setFormData({...formData, sizes: e.target.value})} />
+                      </div>
+                    )}
+                    {categories?.find(c => c.slug === formData.category)?.hasColors && (
+                      <div className="col-span-2 space-y-2">
+                        <Label>Colors (Comma separated, e.g. Red, Blue, Gold)</Label>
+                        <Input placeholder="Red, Blue, Green" value={formData.colors} onChange={e=>setFormData({...formData, colors: e.target.value})} />
                       </div>
                     )}
                     <div className="flex items-center space-x-2">

@@ -22,6 +22,7 @@ export default function ProductDetails() {
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedColor, setSelectedColor] = useState<string>("");
   const [activeImage, setActiveImage] = useState<string>("");
   const { t } = useLanguage();
 
@@ -32,6 +33,10 @@ export default function ProductDetails() {
       if (product.sizes) {
         const sizes = product.sizes.split(",").map(s => s.trim());
         if (sizes.length > 0) setSelectedSize(sizes[0]);
+      }
+      if (product.colors) {
+        const colors = product.colors.split(",").map(s => s.trim());
+        if (colors.length > 0) setSelectedColor(colors[0]);
       }
     }
   }, [product]);
@@ -46,10 +51,19 @@ export default function ProductDetails() {
         });
         return;
       }
-      addItem(product, quantity, selectedSize);
+      if (categories?.find(c => c.slug === product.category)?.hasColors && product.colors && !selectedColor) {
+        toast({
+          title: t("admin.login.error"),
+          description: "Please select a color",
+          variant: "destructive"
+        });
+        return;
+      }
+      addItem(product, quantity, selectedSize, selectedColor);
+      const optionsStr = [selectedSize, selectedColor].filter(Boolean).join(", ");
       toast({
         title: t("product.addedToCart"),
-        description: `${quantity}x ${product.name} ${selectedSize ? `(${selectedSize})` : ""} ${t("product.addedToCartDesc")}`,
+        description: `${quantity}x ${product.name} ${optionsStr ? `(${optionsStr})` : ""} ${t("product.addedToCartDesc")}`,
         className: "bg-primary text-primary-foreground border-none",
       });
     }
@@ -81,6 +95,7 @@ export default function ProductDetails() {
 
   const allImages = [product.imageUrl, ...(product.additionalImages ? product.additionalImages.split(",") : [])].filter(Boolean);
   const sizes = product.sizes ? product.sizes.split(",").map(s => s.trim()) : [];
+  const colors = product.colors ? product.colors.split(",").map(s => s.trim()) : [];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -179,6 +194,29 @@ export default function ProductDetails() {
                         )}
                       >
                         {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Color Selection */}
+              {categories?.find(c => c.slug === product.category)?.hasColors && colors.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm uppercase tracking-wider font-semibold mb-3">Select Color</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {colors.map(color => (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={cn(
+                          "min-w-[4rem] h-12 flex items-center justify-center border transition-all px-4",
+                          selectedColor === color 
+                            ? "border-primary bg-primary text-white shadow-lg" 
+                            : "border-border hover:border-primary"
+                        )}
+                      >
+                        {color}
                       </button>
                     ))}
                   </div>
