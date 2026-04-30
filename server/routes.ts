@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs";
 import multer from "multer";
 import { parse } from "csv-parse/sync";
 import { insertProductSchema, insertCategorySchema } from "@shared/schema";
+import { convertGoogleDriveLink } from "@shared/utils";
 
 declare module "express-session" {
   interface SessionData {
@@ -58,6 +59,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         ...input, 
         price: String(input.price),
         discountPrice: input.discountPrice ? String(input.discountPrice) : null,
+        imageUrl: convertGoogleDriveLink(input.imageUrl),
+        additionalImages: input.additionalImages ? input.additionalImages.split(/[\n,]/).map(s => convertGoogleDriveLink(s.trim())).filter(Boolean).join(",") : null,
       });
       res.status(201).json(product);
     } catch (err) {
@@ -73,6 +76,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const updates: Record<string, any> = { ...input };
       if (updates.price !== undefined) updates.price = String(updates.price);
       if (updates.discountPrice !== undefined) updates.discountPrice = updates.discountPrice ? String(updates.discountPrice) : null;
+      if (updates.imageUrl !== undefined) updates.imageUrl = convertGoogleDriveLink(updates.imageUrl);
+      if (updates.additionalImages !== undefined && updates.additionalImages !== null) {
+        updates.additionalImages = updates.additionalImages.split(/[\n,]/).map(s => convertGoogleDriveLink(s.trim())).filter(Boolean).join(",");
+      }
       const product = await storage.updateProduct(Number(req.params.id), updates as any);
       if (!product) return res.status(404).json({ message: "Product not found" });
       res.json(product);
@@ -108,10 +115,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         try {
           const productData = {
             name: row.name, description: row.description, price: String(row.price),
-            imageUrl: row.imageUrl, category: row.category, stock: parseInt(row.stock) || 0,
+            imageUrl: convertGoogleDriveLink(row.imageUrl), 
+            category: row.category, stock: parseInt(row.stock) || 0,
             isNew: row.isNew === "true", isBestSeller: row.isBestSeller === "true",
             materials: row.materials || null,
             discountPrice: row.discountPrice ? String(row.discountPrice) : null,
+            additionalImages: row.additionalImages ? row.additionalImages.split(/[\n,]/).map(s => convertGoogleDriveLink(s.trim())).filter(Boolean).join(",") : null,
           };
           insertProductSchema.parse(productData);
           const product = await storage.createProduct(productData);
@@ -141,7 +150,10 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
       const input = insertCategorySchema.parse(req.body);
-      const category = await storage.createCategory(input);
+      const category = await storage.createCategory({
+        ...input,
+        imageUrl: convertGoogleDriveLink(input.imageUrl)
+      });
       res.status(201).json(category);
     } catch (err) {
       if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
@@ -153,6 +165,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
       const input = insertCategorySchema.partial().parse(req.body);
+      if (input.imageUrl) input.imageUrl = convertGoogleDriveLink(input.imageUrl);
       const category = await storage.updateCategory(Number(req.params.id), input);
       if (!category) return res.status(404).json({ message: "Category not found" });
       res.json(category);
