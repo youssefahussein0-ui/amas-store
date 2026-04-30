@@ -12,6 +12,22 @@ import { Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { convertGoogleDriveLink, validateEgyptianPhone } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const REGIONS = [
+  { id: "cairo_giza", price: 80 },
+  { id: "alexandria", price: 100 },
+  { id: "delta", price: 110 },
+  { id: "canal", price: 120 },
+  { id: "upper_egypt", price: 130 },
+  { id: "sinai_new_valley", price: 160 },
+];
 
 export default function Checkout() {
   const { items, getCartTotal, getDiscountedTotal, clearCart, appliedDiscount } = useCart();
@@ -25,8 +41,13 @@ export default function Checkout() {
     name: "",
     phone: "",
     address: "",
-    paymentMethod: "cod"
+    paymentMethod: "cod",
+    region: ""
   });
+
+  const selectedRegion = REGIONS.find(r => r.id === formData.region);
+  const shippingFee = selectedRegion ? selectedRegion.price : 0;
+  const finalTotal = getDiscountedTotal() + shippingFee;
 
   if (items.length === 0 && !success) {
     setLocation("/cart");
@@ -65,9 +86,9 @@ export default function Checkout() {
     createOrder.mutate({
       customerName: formData.name,
       customerPhone: formData.phone,
-      customerAddress: formData.address,
+      customerAddress: `${t(`regions.${formData.region}`)} - ${formData.address}`,
       paymentMethod: formData.paymentMethod,
-      totalAmount: getDiscountedTotal(),
+      totalAmount: finalTotal.toString(),
       items: items.map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -141,6 +162,26 @@ export default function Checkout() {
                   </div>
                   
                   <div className="space-y-2">
+                    <Label htmlFor="region">{t("checkout.region")}</Label>
+                    <Select 
+                      required
+                      value={formData.region} 
+                      onValueChange={(val) => setFormData({...formData, region: val})}
+                    >
+                      <SelectTrigger className="bg-background focus:ring-primary">
+                        <SelectValue placeholder={t("checkout.selectRegion")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REGIONS.map((region) => (
+                          <SelectItem key={region.id} value={region.id}>
+                            {t(`regions.${region.id}`)} - {region.price} {t("product.currency")}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="address">{t("checkout.deliveryAddress")}</Label>
                     <textarea 
                       id="address" 
@@ -210,8 +251,8 @@ export default function Checkout() {
                   <span>{getCartTotal().toFixed(2)} {t("product.currency")}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>{t("checkout.shipping")}</span>
-                  <span>{t("checkout.free")}</span>
+                  <span>{t("checkout.shipping")} ({formData.region ? t(`regions.${formData.region}`) : t("checkout.selectRegion")})</span>
+                  <span>{shippingFee > 0 ? `${shippingFee.toFixed(2)} ${t("product.currency")}` : t("checkout.selectRegion")}</span>
                 </div>
                 {appliedDiscount && (
                   <div className="flex justify-between text-green-600 font-medium">
@@ -221,7 +262,7 @@ export default function Checkout() {
                 )}
                 <div className="flex justify-between text-xl font-serif text-primary pt-4">
                   <span>{t("checkout.total")}</span>
-                  <span>{getDiscountedTotal().toFixed(2)} {t("product.currency")}</span>
+                  <span>{finalTotal.toFixed(2)} {t("product.currency")}</span>
                 </div>
               </div>
             </div>

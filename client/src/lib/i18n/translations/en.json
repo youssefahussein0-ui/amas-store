@@ -87,7 +87,17 @@
     "total": "Total",
     "orderSuccess": "Order Placed Successfully!",
     "orderSuccessMsg": "Thank you for shopping with Amas. We've received your order and will process it shortly. You will receive a confirmation message soon.",
-    "returnHome": "Return Home"
+    "returnHome": "Return Home",
+    "selectRegion": "Select Region",
+    "region": "Region / Governorate"
+  },
+  "regions": {
+    "cairo_giza": "Cairo & Giza",
+    "alexandria": "Alexandria",
+    "delta": "Delta Governorates",
+    "canal": "Canal Governorates",
+    "upper_egypt": "Upper Egypt, Red Sea & Matrouh",
+    "sinai_new_valley": "Sinai & New Valley"
   },
   "footer": {
     "tagline": "\"Handcrafted Jewelry That Tells Your Story\"",
