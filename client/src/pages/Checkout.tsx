@@ -74,6 +74,15 @@ export default function Checkout() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.name || !formData.phone || !formData.address || !formData.region) {
+      toast({
+        title: t("admin.login.error"),
+        description: t("checkout.fillAllFields"),
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!validateEgyptianPhone(formData.phone)) {
       toast({
         title: t("admin.login.error"),
