@@ -185,7 +185,10 @@
       "uploadSuccess": "اكتمل الرفع",
       "uploadError": "خطأ في الرفع",
       "productsInserted": "منتجات تمت إضافتها بنجاح",
-      "rowErrors": "أخطاء في الصفوف"
+      "rowErrors": "أخطاء في الصفوف",
+      "selected": "منتجات مختارة",
+      "deleteSelected": "حذف المختار",
+      "clearSelection": "إلغاء التحديد"
     },
     "orders": {
       "title": "إدارة الطلبات",

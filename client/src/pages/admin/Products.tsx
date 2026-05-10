@@ -178,6 +178,38 @@ export default function AdminProducts() {
     }
   };
 
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredProducts?.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredProducts?.map(p => p.id) || []);
+    }
+  };
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Are you sure you want to delete ${selectedIds.length} products?`)) return;
+    
+    setIsBulkDeleting(true);
+    try {
+      await Promise.all(selectedIds.map(id => deleteProduct.mutateAsync(id)));
+      toast({ title: t("admin.products.deleted"), description: `${selectedIds.length} products removed` });
+      setSelectedIds([]);
+    } catch (err: any) {
+      toast({ title: t("admin.login.error"), description: err.message, variant: "destructive" });
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
   const filteredProducts = products?.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     p.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -371,6 +403,29 @@ export default function AdminProducts() {
           </div>
         </div>
 
+        {selectedIds.length > 0 && (
+          <div className="mb-4 p-4 bg-primary/5 border border-primary/20 rounded-xl flex justify-between items-center animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-primary">
+                {selectedIds.length} {t("admin.products.selected")}
+              </span>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                className="gap-2"
+                onClick={handleBulkDelete}
+                disabled={isBulkDeleting}
+              >
+                {isBulkDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {t("admin.products.deleteSelected")}
+              </Button>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setSelectedIds([])}>
+              {t("admin.products.clearSelection")}
+            </Button>
+          </div>
+        )}
+
         <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
           {isLoading ? (
             <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
@@ -378,6 +433,12 @@ export default function AdminProducts() {
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground bg-muted/30 uppercase">
                 <tr>
+                  <th className="px-6 py-4 w-10">
+                    <Checkbox 
+                      checked={selectedIds.length === filteredProducts?.length && filteredProducts?.length > 0}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  </th>
                   <th className="px-6 py-4">{t("admin.products.productCol")}</th>
                   <th className="px-6 py-4">{t("admin.products.category")}</th>
                   <th className="px-6 py-4">{t("admin.products.price")}</th>
@@ -387,7 +448,16 @@ export default function AdminProducts() {
               </thead>
               <tbody>
                 {filteredProducts?.map(p => (
-                  <tr key={p.id} className="border-b border-border/50 hover:bg-muted/10 transition-colors">
+                  <tr key={p.id} className={cn(
+                    "border-b border-border/50 hover:bg-muted/10 transition-colors",
+                    selectedIds.includes(p.id) && "bg-primary/5"
+                  )}>
+                    <td className="px-6 py-4">
+                      <Checkbox 
+                        checked={selectedIds.includes(p.id)}
+                        onCheckedChange={() => toggleSelect(p.id)}
+                      />
+                    </td>
                     <td className="px-6 py-4 flex items-center gap-3">
                       <img src={convertGoogleDriveLink(p.imageUrl)} alt={p.name} className="w-10 h-10 rounded object-cover" />
                       <span className="font-medium text-primary">{p.name}</span>

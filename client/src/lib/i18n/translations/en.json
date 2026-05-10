@@ -185,7 +185,10 @@
       "uploadSuccess": "Upload Complete",
       "uploadError": "Upload Error",
       "productsInserted": "products inserted successfully",
-      "rowErrors": "errors in rows"
+      "rowErrors": "row errors",
+      "selected": "products selected",
+      "deleteSelected": "Delete Selected",
+      "clearSelection": "Clear Selection"
     },
     "orders": {
       "title": "Manage Orders",
