@@ -2,7 +2,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { useCart } from "@/hooks/use-cart";
 import { useCreateOrder } from "@/hooks/use-orders";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { convertGoogleDriveLink, validateEgyptianPhone } from "@/lib/utils";
+import { convertGoogleDriveLink, validateEgyptianPhone, trackEvent } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -40,6 +40,7 @@ export default function Checkout() {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    email: "",
     address: "",
     paymentMethod: "cod",
     region: ""
@@ -48,6 +49,18 @@ export default function Checkout() {
   const selectedRegion = REGIONS.find(r => r.id === formData.region);
   const shippingFee = selectedRegion ? selectedRegion.price : 0;
   const finalTotal = getDiscountedTotal() + shippingFee;
+
+  useEffect(() => {
+    if (items.length > 0) {
+      trackEvent("InitiateCheckout", {
+        content_ids: items.map(item => item.product.id),
+        content_type: 'product',
+        value: finalTotal,
+        currency: 'EGP',
+        num_items: items.length
+      });
+    }
+  }, []);
 
   if (items.length === 0 && !success) {
     setLocation("/cart");
@@ -95,6 +108,7 @@ export default function Checkout() {
     createOrder.mutate({
       customerName: formData.name,
       customerPhone: formData.phone,
+      customerEmail: formData.email || null,
       customerAddress: `${t(`regions.${formData.region}`)} - ${formData.address}`,
       paymentMethod: formData.paymentMethod,
       totalAmount: finalTotal.toString(),
@@ -106,7 +120,15 @@ export default function Checkout() {
         color: item.color || null
       }))
     }, {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        trackEvent("Purchase", {
+          content_ids: items.map(item => item.product.id),
+          content_type: 'product',
+          value: finalTotal,
+          currency: 'EGP',
+          num_items: items.length,
+          transaction_id: data.id
+        });
         clearCart();
         setSuccess(true);
       },
@@ -169,6 +191,17 @@ export default function Checkout() {
                       />
                     </div>
                     <p className="text-[10px] text-muted-foreground">Must be a valid Egyptian number (11 digits)</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">{t("checkout.email")}</Label>
+                    <Input 
+                      id="email" 
+                      type="email"
+                      value={formData.email}
+                      onChange={e => setFormData({...formData, email: e.target.value})}
+                      className="bg-background focus-visible:ring-primary" 
+                    />
                   </div>
                   
                   <div className="space-y-2">

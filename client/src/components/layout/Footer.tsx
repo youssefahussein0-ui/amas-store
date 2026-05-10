@@ -84,7 +84,6 @@ export function Footer() {
                   </DialogContent>
                 </Dialog>
               </li>
-              <li><Link href="/admin/login" className="hover:text-secondary transition-colors">{t("footer.adminPortal")}</Link></li>
             </ul>
           </div>
 

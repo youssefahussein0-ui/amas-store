@@ -127,11 +127,13 @@ export const api = {
       method: 'POST' as const,
       path: '/api/orders' as const,
       input: insertOrderSchema.extend({
+        customerEmail: z.string().email().optional().nullable(),
         items: z.array(z.object({
           productId: z.number(),
           quantity: z.number(),
           price: z.union([z.string(), z.number()]),
           size: z.string().optional().nullable(),
+          color: z.string().optional().nullable(),
         })),
         totalAmount: z.union([z.string(), z.number()]),
       }),

@@ -11,6 +11,7 @@ import multer from "multer";
 import { parse } from "csv-parse/sync";
 import { insertProductSchema, insertCategorySchema } from "@shared/schema";
 import { convertGoogleDriveLink } from "@shared/utils";
+import { sendOrderConfirmation } from "./email";
 
 declare module "express-session" {
   interface SessionData {
@@ -192,9 +193,28 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const input = api.orders.create.input.parse(req.body);
       const order = await storage.createOrder(
-        { customerName: input.customerName, customerPhone: input.customerPhone, customerAddress: input.customerAddress, totalAmount: String(input.totalAmount), paymentMethod: input.paymentMethod },
+        { 
+          customerName: input.customerName, 
+          customerPhone: input.customerPhone, 
+          customerEmail: input.customerEmail || null,
+          customerAddress: input.customerAddress, 
+          totalAmount: String(input.totalAmount), 
+          paymentMethod: input.paymentMethod 
+        },
         input.items
       );
+
+      if (order.customerEmail) {
+        // Send email asynchronously
+        const allProducts = await storage.getProducts();
+        const itemsWithProducts = input.items.map(item => ({
+          ...item,
+          id: 0, orderId: order.id, price: String(item.price),
+          product: allProducts.find(p => p.id === item.productId)!
+        }));
+        sendOrderConfirmation(order, itemsWithProducts as any).catch(console.error);
+      }
+
       res.status(201).json(order);
     } catch (err) {
       if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });

@@ -13,3 +13,9 @@ export function validateEgyptianPhone(phone: string): boolean {
   const regex = /^(010|011|012|015)[0-9]{8}$/;
   return regex.test(phone);
 }
+
+export function trackEvent(eventName: string, params?: Record<string, any>) {
+  if (typeof window !== 'undefined' && (window as any).fbq) {
+    (window as any).fbq('track', eventName, params);
+  }
+}

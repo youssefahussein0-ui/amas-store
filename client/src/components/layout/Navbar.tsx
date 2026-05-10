@@ -116,10 +116,6 @@ export function Navbar() {
                 <Globe className="w-4 h-4" />
                 <span>{language === "en" ? "AR" : "EN"}</span>
               </button>
-              
-              <Link href="/admin/login" className="text-xs font-medium tracking-wide uppercase hover:text-secondary transition-colors duration-300 py-1 px-3 border border-border rounded hover-elevate">
-                {t("nav.admin")}
-              </Link>
             </div>
             
             <Link href="/cart" className="relative group p-2 cursor-pointer">
@@ -170,15 +166,6 @@ export function Navbar() {
                 <Globe className="w-5 h-5" />
                 {language === "en" ? "العربية" : "English"}
               </button>
-
-              <Link
-                href="/admin/login"
-                className="text-lg font-serif text-secondary border-t border-border pt-6 mt-2"
-                onClick={() => setMobileMenuOpen(false)}
-                data-testid="link-admin-mobile"
-              >
-                {t("nav.admin")}
-              </Link>
             </div>
           </motion.div>
         )}

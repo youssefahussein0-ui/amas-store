@@ -10,7 +10,9 @@ export function convertGoogleDriveLink(url: string | null | undefined): string {
   // 2. id=ID
   // 3. open?id=ID
   // 4. /uc?id=ID
-  const idMatch = url.match(/[-\w]{25,}/); // Google Drive IDs are usually 33 characters, but let's be safe
+  let idMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]{25,})/);
+  if (!idMatch) idMatch = url.match(/id=([a-zA-Z0-9_-]{25,})/);
+  if (!idMatch) idMatch = url.match(/[-\w]{25,}/); // Fallback to raw ID matcher
   
   if (idMatch && idMatch[0]) {
     return `https://lh3.googleusercontent.com/d/${idMatch[0]}`;

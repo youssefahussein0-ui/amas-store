@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { useProduct, useProducts } from "@/hooks/use-products";
@@ -10,10 +10,13 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useCategories } from "@/hooks/use-categories";
-import { convertGoogleDriveLink, cn } from "@/lib/utils";
+import { convertGoogleDriveLink, cn, trackEvent } from "@/lib/utils";
+
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1000&auto=format&fit=crop";
 
 export default function ProductDetails() {
   const params = useParams();
+  const [, setLocation] = useLocation();
   const productId = parseInt(params.id || "0");
   const { data: product, isLoading } = useProduct(productId);
   const { data: allProducts } = useProducts();
@@ -41,7 +44,7 @@ export default function ProductDetails() {
     }
   }, [product]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (): boolean => {
     if (product) {
       if (product.sizes && !selectedSize) {
         toast({
@@ -49,7 +52,7 @@ export default function ProductDetails() {
           description: "Please select a size",
           variant: "destructive"
         });
-        return;
+        return false;
       }
       if (categories?.find(c => c.slug === product.category)?.hasColors && product.colors && !selectedColor) {
         toast({
@@ -57,17 +60,37 @@ export default function ProductDetails() {
           description: "Please select a color",
           variant: "destructive"
         });
-        return;
+        return false;
       }
       addItem(product, quantity, selectedSize, selectedColor);
+      
+      trackEvent("AddToCart", {
+        content_name: product.name,
+        content_category: product.category,
+        content_ids: [product.id],
+        content_type: 'product',
+        value: Number(product.discountPrice || product.price) * quantity,
+        currency: 'EGP'
+      });
+
       const optionsStr = [selectedSize, selectedColor].filter(Boolean).join(", ");
       toast({
         title: t("product.addedToCart"),
         description: `${quantity}x ${product.name} ${optionsStr ? `(${optionsStr})` : ""} ${t("product.addedToCartDesc")}`,
         className: "bg-primary text-primary-foreground border-none",
       });
+      return true;
+    }
+    return false;
+  };
+
+  const handleBuyNow = () => {
+    if (handleAddToCart()) {
+      setLocation("/checkout");
     }
   };
+
+  const isSoldOut = product ? product.stock <= 0 : false;
 
   const relatedProducts = allProducts
     ?.filter(p => p.category === product?.category && p.id !== product?.id)
@@ -111,7 +134,8 @@ export default function ProductDetails() {
                 <img 
                   src={convertGoogleDriveLink(activeImage)} 
                   alt={product.name} 
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" 
+                  onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; e.currentTarget.onerror = null; }}
+                  className={cn("w-full h-full object-cover transition-transform duration-500 hover:scale-105", isSoldOut && "grayscale opacity-70")} 
                 />
                 {allImages.length > 1 && (
                   <>
@@ -147,7 +171,7 @@ export default function ProductDetails() {
                         activeImage === img ? "border-primary shadow-md" : "border-transparent opacity-60 hover:opacity-100"
                       )}
                     >
-                      <img src={convertGoogleDriveLink(img)} className="w-full h-full object-cover" />
+                      <img src={convertGoogleDriveLink(img)} onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; e.currentTarget.onerror = null; }} className={cn("w-full h-full object-cover", isSoldOut && "grayscale opacity-70")} />
                     </button>
                   ))}
                 </div>
@@ -159,7 +183,12 @@ export default function ProductDetails() {
               <div className="mb-2">
                 <span className="text-sm uppercase tracking-widest text-secondary font-medium">{product.category}</span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">{product.name}</h1>
+              <div className="flex items-center gap-4 mb-4">
+                <h1 className="text-4xl md:text-5xl font-serif text-primary leading-tight">{product.name}</h1>
+                {isSoldOut && (
+                  <span className="bg-muted text-muted-foreground text-xs font-bold px-3 py-1.5 rounded uppercase">{t("product.soldOut")}</span>
+                )}
+              </div>
               {product.discountPrice ? (
                 <div className="flex items-center gap-4 mb-8">
                   <span className="text-3xl font-serif text-primary">{Number(product.discountPrice).toFixed(2)} {t("product.currency")}</span>
@@ -223,26 +252,40 @@ export default function ProductDetails() {
                 </div>
               )}
 
-              <div className="flex items-center gap-6 mb-8 border-y border-border py-6">
-                <div className="flex items-center border border-input rounded-md">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-8 border-y border-border py-6">
+                <div className="flex items-center justify-between sm:justify-start border border-input rounded-md flex-shrink-0">
                   <button 
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-4 py-2 text-xl hover:text-primary transition-colors"
+                    disabled={isSoldOut}
+                    className="px-4 py-3 text-xl hover:text-primary transition-colors disabled:opacity-50"
                   >-</button>
                   <span className="w-12 text-center font-medium">{quantity}</span>
                   <button 
                     onClick={() => setQuantity(quantity + 1)}
-                    className="px-4 py-2 text-xl hover:text-primary transition-colors"
+                    disabled={isSoldOut}
+                    className="px-4 py-3 text-xl hover:text-primary transition-colors disabled:opacity-50"
                   >+</button>
                 </div>
                 
-                <Button 
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-primary hover:bg-primary/90 text-white h-14 rounded-md font-medium tracking-wide uppercase shadow-lg shadow-primary/20"
-                >
-                  <ShoppingCart className="w-4 h-4 me-2" />
-                  {t("product.addToCart")}
-                </Button>
+                <div className="flex flex-1 gap-3">
+                  <Button 
+                    onClick={handleAddToCart}
+                    disabled={isSoldOut}
+                    className={cn("flex-1 h-14 rounded-md font-medium tracking-wide uppercase shadow-lg", isSoldOut ? "bg-muted text-muted-foreground" : "bg-secondary hover:bg-secondary/90 text-secondary-foreground")}
+                  >
+                    <ShoppingCart className="w-4 h-4 me-2" />
+                    {isSoldOut ? t("product.soldOut") : t("product.addToCart")}
+                  </Button>
+                  
+                  {!isSoldOut && (
+                    <Button 
+                      onClick={handleBuyNow}
+                      className="flex-1 bg-primary hover:bg-primary/90 text-white h-14 rounded-md font-medium tracking-wide uppercase shadow-lg shadow-primary/20"
+                    >
+                      {t("product.buyNow")}
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* Value Props */}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { type Product } from "@shared/schema";
 import { Eye, ShoppingCart } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
@@ -7,11 +7,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { convertGoogleDriveLink } from "@/lib/utils";
+import { convertGoogleDriveLink, cn, trackEvent } from "@/lib/utils";
 
 interface ProductCardProps {
   product: Product;
 }
+
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1000&auto=format&fit=crop";
 
 export function ProductCard({ product }: ProductCardProps) {
   const [quickViewOpen, setQuickViewOpen] = useState(false);
@@ -19,16 +21,36 @@ export function ProductCard({ product }: ProductCardProps) {
   const { toast } = useToast();
   const { t } = useLanguage();
 
+  const [, setLocation] = useLocation();
+
+  const isSoldOut = product.stock <= 0;
+
   const handleAddToCart = (e?: React.MouseEvent) => {
     e?.preventDefault();
     e?.stopPropagation();
+    if (isSoldOut) return;
     addItem(product, 1);
+    
+    trackEvent("AddToCart", {
+      content_name: product.name,
+      content_category: product.category,
+      content_ids: [product.id],
+      content_type: 'product',
+      value: Number(product.discountPrice || product.price),
+      currency: 'EGP'
+    });
+
     toast({
       title: t("product.addedToCart"),
       description: `${product.name} ${t("product.addedToCartDesc")}`,
       className: "bg-primary text-primary-foreground border-none",
     });
     setQuickViewOpen(false);
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    handleAddToCart(e);
+    setLocation("/checkout");
   };
 
   return (
@@ -51,12 +73,18 @@ export function ProductCard({ product }: ProductCardProps) {
               {t("product.sale")}
             </span>
           )}
+          {isSoldOut && (
+            <div className="absolute inset-0 bg-background/50 z-20 flex items-center justify-center">
+              <span className="bg-muted text-muted-foreground font-bold px-4 py-2 rounded uppercase tracking-wider">{t("product.soldOut")}</span>
+            </div>
+          )}
           
           <Link href={`/product/${product.id}`} className="block w-full h-full">
             <img
               src={convertGoogleDriveLink(product.imageUrl)}
               alt={product.name}
-              className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700 ease-out"
+              onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; e.currentTarget.onerror = null; }}
+              className={cn("object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-700 ease-out", isSoldOut && "grayscale opacity-70")}
             />
           </Link>
 
@@ -95,7 +123,12 @@ export function ProductCard({ product }: ProductCardProps) {
           <DialogTitle className="sr-only">{product.name} Quick View</DialogTitle>
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="aspect-square md:aspect-auto h-full bg-muted/20">
-              <img src={convertGoogleDriveLink(product.imageUrl)} alt={product.name} className="w-full h-full object-cover" />
+              <img 
+                src={convertGoogleDriveLink(product.imageUrl)} 
+                alt={product.name} 
+                onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; e.currentTarget.onerror = null; }}
+                className={cn("w-full h-full object-cover", isSoldOut && "grayscale opacity-70")} 
+              />
             </div>
             <div className="p-8 md:p-12 flex flex-col justify-center">
               <h2 className="text-3xl font-serif text-primary mb-2">{product.name}</h2>
@@ -114,14 +147,25 @@ export function ProductCard({ product }: ProductCardProps) {
                 {product.description}
               </p>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <Button 
                   onClick={handleAddToCart}
-                  className="w-full bg-primary hover:bg-primary/90 text-white rounded-none h-14 font-medium tracking-wide uppercase"
+                  disabled={isSoldOut}
+                  className={cn("w-full rounded-none h-14 font-medium tracking-wide uppercase", isSoldOut ? "bg-muted text-muted-foreground" : "bg-secondary hover:bg-secondary/90 text-secondary-foreground")}
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  {t("product.addToCart")}
+                  {isSoldOut ? t("product.soldOut") : t("product.addToCart")}
                 </Button>
+                
+                {!isSoldOut && (
+                  <Button 
+                    onClick={handleBuyNow}
+                    className="w-full bg-primary hover:bg-primary/90 text-white rounded-none h-14 font-medium tracking-wide uppercase"
+                  >
+                    {t("product.buyNow")}
+                  </Button>
+                )}
+                
                 <Button 
                   variant="outline" 
                   onClick={() => window.location.href = `/product/${product.id}`}
