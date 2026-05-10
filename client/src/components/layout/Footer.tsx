@@ -43,6 +43,30 @@ export function Footer() {
               <li>
                 <Dialog>
                   <DialogTrigger asChild>
+                    <button className="hover:text-secondary transition-colors text-start">{t("footer.policies")}</button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl bg-white max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl font-serif text-primary border-b pb-2">{t("footer.policies")}</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-6">
+                      <ul className="space-y-4">
+                        {(t("footer.policyList", { returnObjects: true }) as string[]).map((policy, idx) => (
+                          <li key={idx} className="flex gap-4 items-start text-primary/80">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-secondary/10 text-secondary flex items-center justify-center text-xs font-bold mt-0.5">
+                              {idx + 1}
+                            </span>
+                            <span className="text-lg leading-relaxed">{policy}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </li>
+              <li>
+                <Dialog>
+                  <DialogTrigger asChild>
                     <button className="hover:text-secondary transition-colors text-start">{t("footer.contactUs")}</button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md bg-white">
@@ -50,6 +74,17 @@ export function Footer() {
                       <DialogTitle className="text-2xl font-serif text-primary border-b pb-2">{t("footer.contactUs")}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6 py-4">
+                      {/* Address Section */}
+                      <div className="space-y-3">
+                        <h5 className="font-medium flex items-center gap-2 text-primary">
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                          {language === 'ar' ? 'العنوان' : 'Address'}
+                        </h5>
+                        <div className="pl-6 text-primary/70 leading-relaxed">
+                          {t("footer.address")}
+                        </div>
+                      </div>
+
                       <div className="space-y-3">
                         <h5 className="font-medium flex items-center gap-2 text-primary">
                           <Phone className="w-4 h-4" /> {language === 'ar' ? 'أرقام الهاتف' : 'Phone Numbers'}

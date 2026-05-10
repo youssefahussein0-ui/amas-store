@@ -111,7 +111,17 @@
     "materialsCare": "Materials & Care",
     "contactUs": "Contact Us",
     "adminPortal": "Admin Portal",
-    "copyright": "© {year} أماس Amas Jewelry. All rights reserved."
+    "address": "Baron City – Maadi Ring Road – Next to Sama Tower – Before Carrefour Maadi 72B",
+    "policies": "Return & Exchange Policies",
+    "policyList": [
+      "Order inspection is allowed upon delivery.",
+      "Returns allowed within 14 days of purchase.",
+      "Items must be in their original condition.",
+      "Refunds are issued using the same payment method.",
+      "Customer is entitled to a refund of the actual amount paid as stated on the invoice.",
+      "Customer has the right to exchange the item for another of the same value as stated on the invoice."
+    ],
+    "copyright": "© {year} Amas Jewelry. All rights reserved."
   },
   "admin": {
     "login": {
