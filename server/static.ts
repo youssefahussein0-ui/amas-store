@@ -3,17 +3,38 @@ import fs from "fs";
 import path from "path";
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "public");
-  if (!fs.existsSync(distPath)) {
+  // Try to find the public directory in multiple possible locations
+  const possiblePaths = [
+    path.resolve(__dirname, "public"),
+    path.resolve(__dirname, "..", "dist", "public"),
+    path.resolve(process.cwd(), "dist", "public"),
+    path.resolve(process.cwd(), "public")
+  ];
+
+  let distPath = "";
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p) && fs.existsSync(path.join(p, "index.html"))) {
+      distPath = p;
+      break;
+    }
+  }
+
+  if (!distPath) {
+    console.error("Static paths searched:", possiblePaths);
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find the build directory with index.html. Make sure to build the client first.`,
     );
   }
 
+  console.log(`[static] Serving files from: ${distPath}`);
   app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
-  app.use((_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  app.use((req, res) => {
+    if (!req.path.startsWith("/api")) {
+      res.sendFile(path.resolve(distPath, "index.html"));
+    } else {
+      res.status(404).json({ message: "API route not found" });
+    }
   });
 }
