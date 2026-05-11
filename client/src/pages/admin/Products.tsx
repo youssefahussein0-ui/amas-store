@@ -38,6 +38,10 @@ export default function AdminProducts() {
     additionalImages: "", sizes: "", colors: ""
   });
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
+
   const resetForm = () => {
     setFormData({ name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: "", additionalImages: "", sizes: "", colors: "" });
     setEditingProduct(null);
@@ -215,6 +219,19 @@ export default function AdminProducts() {
     p.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil((filteredProducts?.length || 0) / itemsPerPage);
+  const paginatedProducts = filteredProducts?.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset to first page when search changes
+  const handleSearchChange = (val: string) => {
+    setSearchTerm(val);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
@@ -230,7 +247,7 @@ export default function AdminProducts() {
                 placeholder="Search products..." 
                 className="pl-10 w-64 bg-white"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
               />
             </div>
             {/* Upload File Button */}
@@ -435,8 +452,14 @@ export default function AdminProducts() {
                 <tr>
                   <th className="px-6 py-4 w-10">
                     <Checkbox 
-                      checked={selectedIds.length === filteredProducts?.length && filteredProducts?.length > 0}
-                      onCheckedChange={toggleSelectAll}
+                      checked={selectedIds.length > 0 && selectedIds.length === paginatedProducts?.length}
+                      onCheckedChange={() => {
+                        if (selectedIds.length === paginatedProducts?.length) {
+                          setSelectedIds([]);
+                        } else {
+                          setSelectedIds(paginatedProducts?.map(p => p.id) || []);
+                        }
+                      }}
                     />
                   </th>
                   <th className="px-6 py-4">{t("admin.products.productCol")}</th>
@@ -447,7 +470,7 @@ export default function AdminProducts() {
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts?.map(p => (
+                {paginatedProducts?.map(p => (
                   <tr key={p.id} className={cn(
                     "border-b border-border/50 hover:bg-muted/10 transition-colors",
                     selectedIds.includes(p.id) && "bg-primary/5"
@@ -479,6 +502,55 @@ export default function AdminProducts() {
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/10">
+                <div className="text-sm text-muted-foreground">
+                  Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, filteredProducts?.length || 0)} of {filteredProducts?.length} products
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      // Logic to show a window of pages around current page
+                      let pageNum;
+                      if (totalPages <= 5) pageNum = i + 1;
+                      else if (currentPage <= 3) pageNum = i + 1;
+                      else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                      else pageNum = currentPage - 2 + i;
+                      
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          className="w-8 h-8 p-0"
+                          onClick={() => setCurrentPage(pageNum)}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           )}
         </div>
       </main>
