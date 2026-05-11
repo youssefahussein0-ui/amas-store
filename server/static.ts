@@ -30,11 +30,11 @@ export function serveStatic(app: Express) {
   app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
-  app.use((req, res) => {
-    if (!req.path.startsWith("/api")) {
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith("/api")) {
       res.sendFile(path.resolve(distPath, "index.html"));
     } else {
-      res.status(404).json({ message: "API route not found" });
+      next();
     }
   });
 }
