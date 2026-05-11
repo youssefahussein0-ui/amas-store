@@ -29,13 +29,13 @@ def main():
         os.write(fd, "pkill -f drizzle-kit || true\n".encode())
         time.sleep(1)
         
-        # 2. Add missing column if it doesn't exist
+        # 2. Add missing column using the correct database name and user
         sql = "ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_email TEXT;"
-        os.write(fd, f'sudo -u postgres psql -d amas_jewelry -c "{sql}"\n'.encode())
+        # Use pg_dump/psql with the full URL from .env or just direct psql
+        os.write(fd, f'sudo -u postgres psql -d amas_store -c "{sql}"\n'.encode())
         time.sleep(2)
         
         # 3. Deploy
-        # Note: We run vite build directly to ensure it works
         os.write(fd, "cd /var/www/amas-store && git reset --hard HEAD && git pull && npm install && npm run build && pm2 restart all\n".encode())
         
         # Keep reading for output

@@ -447,7 +447,8 @@ export default function AdminProducts() {
           {isLoading ? (
             <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
           ) : (
-            <table className="w-full text-sm text-left">
+            <>
+              <table className="w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground bg-muted/30 uppercase">
                 <tr>
                   <th className="px-6 py-4 w-10">
@@ -551,6 +552,7 @@ export default function AdminProducts() {
                 </div>
               </div>
             )}
+            </>
           )}
         </div>
       </main>

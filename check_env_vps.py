@@ -22,9 +22,8 @@ def main():
         os.write(fd, (password + "\n").encode())
         time.sleep(2)
         
-        # Read .env on server
+        # Check .env
         os.write(fd, "cat /var/www/amas-store/.env\n".encode())
-        time.sleep(1)
         
         # Keep reading
         for _ in range(10):
