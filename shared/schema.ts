@@ -91,3 +91,9 @@ export const leads = pgTable("leads", {
 export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true });
 export type Lead = typeof leads.$inferSelect;
 export type InsertLead = z.infer<typeof insertLeadSchema>;
+
+export const sessions = pgTable("session", {
+  sid: text("sid").primaryKey(),
+  sess: text("sess").notNull(),
+  expire: timestamp("expire").notNull(),
+});

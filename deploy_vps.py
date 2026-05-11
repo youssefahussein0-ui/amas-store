@@ -24,6 +24,9 @@ def main():
         
         # Wait for shell prompt
         time.sleep(2)
+        # Kill any hanging processes from previous failed/interrupted deploys
+        os.write(fd, "pkill -f drizzle-kit || true\n".encode())
+        time.sleep(1)
         # Fix: use npm run db:push with yes for non-interactive
         os.write(fd, "cd /var/www/amas-store && git reset --hard HEAD && git pull && npm install && yes | npm run db:push && npm run build && pm2 restart all\n".encode())
         
