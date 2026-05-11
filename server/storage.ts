@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { products, orders, orderItems, adminUsers, categories, leads, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead } from "@shared/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
   getProducts(): Promise<Product[]>;
@@ -85,19 +85,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAdminStats(): Promise<{totalOrders: number, totalRevenue: number, totalProducts: number}> {
-    const [stats] = await db.execute(sql`
-      SELECT 
-        COUNT(*) as "totalOrders",
-        COALESCE(SUM(CAST("total_amount" as NUMERIC)), 0) as "totalRevenue"
-      FROM "orders"
-    `);
-    
-    const [productCount] = await db.execute(sql`SELECT COUNT(*) as "count" FROM "products"`);
-    
+    const allOrders = await db.select().from(orders);
+    const allProducts = await db.select().from(products);
     return {
-      totalOrders: Number((stats as any).totalOrders),
-      totalRevenue: Number((stats as any).totalRevenue),
-      totalProducts: Number((productCount as any).count),
+      totalOrders: allOrders.length,
+      totalRevenue: allOrders.reduce((sum, o) => sum + Number(o.totalAmount), 0),
+      totalProducts: allProducts.length,
     };
   }
 
