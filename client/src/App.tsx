@@ -21,6 +21,7 @@ import Categories from "./pages/admin/Categories";
 import Orders from "./pages/admin/Orders";
 import Leads from "./pages/admin/Leads";
 import { ProtectedAdminRoute } from "@/components/layout/ProtectedAdminRoute";
+import { ErrorBoundary } from "@/components/layout/ErrorBoundary";
 
 function Router() {
   return (
@@ -62,7 +63,9 @@ function App() {
       <LanguageProvider>
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <ErrorBoundary>
+            <Router />
+          </ErrorBoundary>
         </TooltipProvider>
       </LanguageProvider>
     </QueryClientProvider>

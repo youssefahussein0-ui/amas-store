@@ -62,8 +62,13 @@ export default function Checkout() {
     }
   }, []);
 
+  useEffect(() => {
+    if (items.length === 0 && !success) {
+      setLocation("/cart");
+    }
+  }, [items.length, success, setLocation]);
+
   if (items.length === 0 && !success) {
-    setLocation("/cart");
     return null;
   }
 

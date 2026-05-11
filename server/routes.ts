@@ -27,7 +27,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.use(
     session({
       store: sessionStore,
-      secret: process.env.SESSION_SECRET || "amas-jewel-boutique-s3cr3t-k3y-2026-pr0duct10n",
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       proxy: true,
@@ -301,8 +301,8 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 async function seedDatabase() {
   try {
     const existingAdmin = await storage.getAdminByUsername("admin");
-    if (!existingAdmin) {
-      await storage.createAdmin("admin", await bcrypt.hash("Amas@2026!", 10));
+    if (!existingAdmin && process.env.ADMIN_PASSWORD) {
+      await storage.createAdmin("admin", await bcrypt.hash(process.env.ADMIN_PASSWORD, 10));
       console.log("✅ Default admin created.");
     }
     const defaultCategories = [

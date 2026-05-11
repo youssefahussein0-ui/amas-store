@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { products, orders, orderItems, adminUsers, categories, leads, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   getProducts(): Promise<Product[]>;
@@ -52,15 +52,19 @@ export class DatabaseStorage implements IStorage {
     const allOrders = await db.select().from(orders).orderBy(desc(orders.createdAt));
     const allOrderItems = await db.select().from(orderItems);
     const allProducts = await db.select().from(products);
+    
     return allOrders.map(order => ({
       ...order,
       items: allOrderItems
         .filter(item => item.orderId === order.id)
-        .map(item => ({ ...item, product: allProducts.find(p => p.id === item.productId)! }))
+        .map(item => {
+          const product = allProducts.find(p => p.id === item.productId);
+          return { ...item, product: product! };
+        })
     }));
   }
 
-  async createOrder(insertOrder: InsertOrder, items: {productId: number, quantity: number, price: string | number, size?: string | null}[]): Promise<Order> {
+  async createOrder(insertOrder: InsertOrder, items: {productId: number, quantity: number, price: string | number, size?: string | null, color?: string | null}[]): Promise<Order> {
     const [order] = await db.insert(orders).values(insertOrder).returning();
     for (const item of items) {
       await db.insert(orderItems).values({ 
@@ -81,12 +85,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAdminStats(): Promise<{totalOrders: number, totalRevenue: number, totalProducts: number}> {
-    const allOrders = await db.select().from(orders);
-    const allProducts = await db.select().from(products);
+    const [stats] = await db.execute(sql`
+      SELECT 
+        COUNT(*) as "totalOrders",
+        COALESCE(SUM(CAST("total_amount" as NUMERIC)), 0) as "totalRevenue"
+      FROM "orders"
+    `);
+    
+    const [productCount] = await db.execute(sql`SELECT COUNT(*) as "count" FROM "products"`);
+    
     return {
-      totalOrders: allOrders.length,
-      totalRevenue: allOrders.reduce((sum, o) => sum + Number(o.totalAmount), 0),
-      totalProducts: allProducts.length,
+      totalOrders: Number((stats as any).totalOrders),
+      totalRevenue: Number((stats as any).totalRevenue),
+      totalProducts: Number((productCount as any).count),
     };
   }
 

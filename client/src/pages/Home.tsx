@@ -8,7 +8,6 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { useCategories } from "@/hooks/use-categories";
 import { convertGoogleDriveLink } from "@/lib/utils";
 import logoImg from "@assets/logo_gold.png";
 import heroBg from "@assets/amas2.jpeg";
