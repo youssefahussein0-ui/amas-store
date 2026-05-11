@@ -4,7 +4,6 @@ import sys
 import time
 
 def main():
-    cmd = "ssh -o StrictHostKeyChecking=no root@187.124.220.187"
     password = sys.argv[1]
     
     pid, fd = pty.fork()
@@ -21,25 +20,21 @@ def main():
             buffer += chunk
         
         os.write(fd, (password + "\n").encode())
-        
-        # Wait for shell prompt
         time.sleep(2)
-        # Kill any hanging processes from previous failed/interrupted deploys
-        os.write(fd, "pkill -f drizzle-kit || true\n".encode())
-        time.sleep(1)
-        # Fix: use npm run db:push with yes for non-interactive
-        os.write(fd, "cd /var/www/amas-store && git reset --hard HEAD && git pull && npm install && yes | npm run db:push && npm run build && pm2 restart all\n".encode())
         
-        # Keep reading for a bit to see output
-        for _ in range(120):
+        # Check PM2 logs
+        os.write(fd, "pm2 logs amas-store --lines 50\n".encode())
+        
+        # Keep reading
+        for _ in range(10):
             chunk = os.read(fd, 4096)
             if not chunk:
                 break
             sys.stdout.buffer.write(chunk)
             sys.stdout.buffer.flush()
-            if b"PM2" in chunk:
-                break
             time.sleep(1)
+        
+        os.write(fd, "exit\n".encode())
 
 if __name__ == "__main__":
     main()
