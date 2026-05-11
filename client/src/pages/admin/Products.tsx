@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@shared/routes";
-import { convertGoogleDriveLink } from "@/lib/utils";
+import { convertGoogleDriveLink, cn } from "@/lib/utils";
 
 export default function AdminProducts() {
   const { data: products, isLoading } = useProducts();
