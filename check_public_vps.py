@@ -22,8 +22,9 @@ def main():
         os.write(fd, (password + "\n").encode())
         time.sleep(2)
         
-        # Check PM2 logs
-        os.write(fd, "pm2 logs amas-store --lines 50\n".encode())
+        # Check files in dist/public
+        os.write(fd, "ls -R /var/www/amas-store/dist/public\n".encode())
+        time.sleep(1)
         
         # Keep reading
         for _ in range(10):

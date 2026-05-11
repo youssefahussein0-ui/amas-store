@@ -9,21 +9,21 @@ const translations: Record<Language, Record<string, any>> = { en, ar };
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string, replacements?: Record<string, string>) => string;
+  t: (key: string, replacements?: Record<string, string>, options?: { returnObjects?: boolean }) => any;
   dir: "ltr" | "rtl";
   isRTL: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
-function getNestedValue(obj: any, path: string): string {
+function getNestedValue(obj: any, path: string): any {
   const keys = path.split(".");
   let current = obj;
   for (const key of keys) {
     if (current === undefined || current === null) return path;
     current = current[key];
   }
-  return typeof current === "string" ? current : path;
+  return current !== undefined ? current : path;
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
@@ -38,11 +38,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: string, replacements?: Record<string, string>) => {
+    (key: string, replacements?: Record<string, string>, _options?: { returnObjects?: boolean }) => {
       let value = getNestedValue(translations[language], key);
-      if (replacements) {
+      if (typeof value === "string" && replacements) {
         Object.entries(replacements).forEach(([k, v]) => {
-          value = value.replace(`{${k}}`, v);
+          value = (value as string).replace(`{${k}}`, v);
         });
       }
       return value;

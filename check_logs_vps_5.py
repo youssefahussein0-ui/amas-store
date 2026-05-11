@@ -22,8 +22,8 @@ def main():
         os.write(fd, (password + "\n").encode())
         time.sleep(2)
         
-        # Check PM2 status and logs
-        os.write(fd, "pm2 status && pm2 logs amas-store --lines 50\n".encode())
+        # Check PM2 logs - last 100 lines
+        os.write(fd, "pm2 logs amas-store --lines 100 --no-daemon\n".encode())
         
         # Keep reading
         for _ in range(15):
