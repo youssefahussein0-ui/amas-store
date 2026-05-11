@@ -47,7 +47,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.get(api.products.get.path, async (req, res) => {
-    const product = await storage.getProduct(Number(req.params.id));
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid product ID" });
+    const product = await storage.getProduct(id);
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.json(product);
   });
@@ -81,7 +83,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (updates.additionalImages !== undefined && updates.additionalImages !== null) {
         updates.additionalImages = updates.additionalImages.split(/[\n,]/).map(s => convertGoogleDriveLink(s.trim())).filter(Boolean).join(",");
       }
-      const product = await storage.updateProduct(Number(req.params.id), updates as any);
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid product ID" });
+      const product = await storage.updateProduct(id, updates as any);
       if (!product) return res.status(404).json({ message: "Product not found" });
       res.json(product);
     } catch (err) {
@@ -92,7 +96,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.delete(api.products.delete.path, async (req, res) => {
     if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
-    const deleted = await storage.deleteProduct(Number(req.params.id));
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid product ID" });
+    const deleted = await storage.deleteProduct(id);
     if (!deleted) return res.status(404).json({ message: "Product not found" });
     res.status(204).send();
   });
@@ -142,7 +148,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   });
 
   app.get(api.categories.get.path, async (req, res) => {
-    const category = await storage.getCategory(Number(req.params.id));
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid category ID" });
+    const category = await storage.getCategory(id);
     if (!category) return res.status(404).json({ message: "Category not found" });
     res.json(category);
   });
@@ -167,7 +175,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
       const input = insertCategorySchema.partial().parse(req.body);
       if (input.imageUrl) input.imageUrl = convertGoogleDriveLink(input.imageUrl);
-      const category = await storage.updateCategory(Number(req.params.id), input);
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid category ID" });
+      const category = await storage.updateCategory(id, input);
       if (!category) return res.status(404).json({ message: "Category not found" });
       res.json(category);
     } catch (err) {
@@ -178,7 +188,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.delete(api.categories.delete.path, async (req, res) => {
     if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
-    const deleted = await storage.deleteCategory(Number(req.params.id));
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid category ID" });
+    const deleted = await storage.deleteCategory(id);
     if (!deleted) return res.status(404).json({ message: "Category not found" });
     res.status(204).send();
   });
@@ -226,7 +238,9 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
       const input = api.orders.updateStatus.input.parse(req.body);
-      const order = await storage.updateOrderStatus(Number(req.params.id), input.status);
+      const id = Number(req.params.id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid order ID" });
+      const order = await storage.updateOrderStatus(id, input.status);
       if (!order) return res.status(404).json({ message: "Order not found" });
       res.json(order);
     } catch (err) {
