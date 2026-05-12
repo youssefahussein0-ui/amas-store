@@ -45,8 +45,7 @@ export default function AdminOrders() {
                     <td className="px-6 py-4">
                       <div className="font-medium">{o.customerName}</div>
                       <div className="text-xs text-muted-foreground">{o.customerPhone}</div>
-                      <div className="text-xs text-muted-foreground italic">{o.deliveryAddress}</div>
-                      <div className="text-xs text-muted-foreground font-bold">{o.region}</div>
+                      <div className="text-xs text-muted-foreground italic">{o.customerAddress}</div>
                     </td>
                     <td className="px-6 py-4">
                       <Dialog>
@@ -73,8 +72,7 @@ export default function AdminOrders() {
                               </div>
                               <div>
                                 <p className="text-muted-foreground uppercase text-[10px] font-bold tracking-wider mb-1">{t("checkout.deliveryAddress")}</p>
-                                <p className="text-xs leading-relaxed">{o.deliveryAddress}</p>
-                                <p className="text-xs font-bold mt-1">{o.region}</p>
+                                <p className="text-xs leading-relaxed">{o.customerAddress}</p>
                               </div>
                             </div>
 
