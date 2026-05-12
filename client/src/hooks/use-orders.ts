@@ -45,6 +45,27 @@ export function useUpdateOrderStatus() {
       if (!res.ok) throw new Error("Failed to update status");
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [api.orders.list.path] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.orders.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.admin.stats.path] });
+    },
+  });
+}
+
+export function useDeleteOrder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const url = buildUrl(api.orders.delete.path, { id });
+      const res = await fetch(url, {
+        method: api.orders.delete.method,
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to delete order");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.orders.list.path] });
+      queryClient.invalidateQueries({ queryKey: [api.admin.stats.path] });
+    },
   });
 }

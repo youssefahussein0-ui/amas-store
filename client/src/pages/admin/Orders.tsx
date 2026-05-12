@@ -1,18 +1,39 @@
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
-import { useOrders, useUpdateOrderStatus } from "@/hooks/use-orders";
-import { Loader2, Eye } from "lucide-react";
+import { useOrders, useUpdateOrderStatus, useDeleteOrder } from "@/hooks/use-orders";
+import { Loader2, Eye, Trash2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { convertGoogleDriveLink } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminOrders() {
   const { data: orders, isLoading } = useOrders();
   const updateStatus = useUpdateOrderStatus();
+  const deleteOrder = useDeleteOrder();
   const { t } = useLanguage();
+  const { toast } = useToast();
 
   const handleStatusChange = (id: number, status: string) => {
     updateStatus.mutate({ id, status });
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm(t("admin.dashboard.resetDataTitle"))) return;
+    
+    try {
+      await deleteOrder.mutateAsync(id);
+      toast({
+        title: "Success",
+        description: "Order deleted successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -142,7 +163,7 @@ export default function AdminOrders() {
                         {o.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 flex items-center gap-2">
                       <select 
                         className="text-xs border-border rounded p-1.5 bg-muted/20 focus:ring-1 focus:ring-primary outline-none transition-all"
                         value={o.status}
@@ -154,6 +175,15 @@ export default function AdminOrders() {
                         <option value="delivered">{t("admin.orders.delivered")}</option>
                         <option value="cancelled">{t("admin.orders.cancelled")}</option>
                       </select>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDelete(o.id)}
+                        disabled={deleteOrder.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </td>
                   </tr>
                 ))}

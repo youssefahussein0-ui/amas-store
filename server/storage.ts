@@ -11,6 +11,7 @@ export interface IStorage {
   getOrders(): Promise<OrderWithItems[]>;
   createOrder(order: InsertOrder, items: {productId: number, quantity: number, price: string | number, size?: string | null, color?: string | null}[]): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
+  deleteOrder(id: number): Promise<boolean>;
   getAdminStats(): Promise<{totalOrders: number, totalRevenue: number, totalProducts: number}>;
   getAdminByUsername(username: string): Promise<AdminUser | undefined>;
   createAdmin(username: string, hashedPassword: string): Promise<AdminUser>;
@@ -84,6 +85,12 @@ export class DatabaseStorage implements IStorage {
   async updateOrderStatus(id: number, status: string): Promise<Order | undefined> {
     const [order] = await db.update(orders).set({ status }).where(eq(orders.id, id)).returning();
     return order;
+  }
+
+  async deleteOrder(id: number): Promise<boolean> {
+    await db.delete(orderItems).where(eq(orderItems.orderId, id));
+    const [deleted] = await db.delete(orders).where(eq(orders.id, id)).returning();
+    return !!deleted;
   }
 
   async getAdminStats(): Promise<{totalOrders: number, totalRevenue: number, totalProducts: number}> {

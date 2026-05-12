@@ -249,6 +249,15 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  app.delete(api.orders.delete.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid order ID" });
+    const success = await storage.deleteOrder(id);
+    if (!success) return res.status(404).json({ message: "Order not found" });
+    res.status(204).end();
+  });
+
   app.delete(api.orders.deleteAll.path, async (req, res) => {
     if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
     await storage.deleteAllOrders();
