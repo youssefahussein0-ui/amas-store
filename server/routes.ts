@@ -249,6 +249,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  app.delete(api.orders.deleteAll.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    await storage.deleteAllOrders();
+    res.status(204).end();
+  });
+
   // Admin Auth
   app.post(api.admin.login.path, async (req: Request, res: Response) => {
     try {
@@ -281,6 +287,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.get(api.admin.leads.path, async (req, res) => {
     if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
     res.json(await storage.getLeads());
+  });
+
+  app.delete(api.admin.clearLeads.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    await storage.deleteAllLeads();
+    res.status(204).end();
   });
 
   app.post(api.leads.create.path, async (req, res) => {

@@ -21,6 +21,8 @@ export interface IStorage {
   deleteCategory(id: number): Promise<boolean>;
   getLeads(): Promise<Lead[]>;
   createLead(lead: InsertLead): Promise<Lead>;
+  deleteAllOrders(): Promise<void>;
+  deleteAllLeads(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -135,6 +137,15 @@ export class DatabaseStorage implements IStorage {
   async createLead(insertLead: InsertLead): Promise<Lead> {
     const [lead] = await db.insert(leads).values(insertLead).returning();
     return lead;
+  }
+
+  async deleteAllOrders(): Promise<void> {
+    await db.delete(orderItems);
+    await db.delete(orders);
+  }
+
+  async deleteAllLeads(): Promise<void> {
+    await db.delete(leads);
   }
 }
 

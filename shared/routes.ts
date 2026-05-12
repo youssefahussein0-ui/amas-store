@@ -152,6 +152,13 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    deleteAll: {
+      method: 'DELETE' as const,
+      path: '/api/orders/all' as const,
+      responses: {
+        204: z.void(),
+      },
+    },
   },
   admin: {
     stats: {
@@ -196,6 +203,13 @@ export const api = {
       path: '/api/admin/leads' as const,
       responses: {
         200: z.array(z.any()),
+      },
+    },
+    clearLeads: {
+      method: 'DELETE' as const,
+      path: '/api/admin/leads/all' as const,
+      responses: {
+        204: z.void(),
       },
     },
   },

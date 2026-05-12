@@ -221,7 +221,13 @@
       "price": "Price",
       "quantity": "Qty",
       "size": "Size",
-      "color": "Color"
+      "color": "Color",
+      "total": "Total",
+      "resetData": "Reset Data",
+      "resetDataTitle": "Are you absolutely sure?",
+      "resetDataDescription": "This action will permanently delete all test orders and reset the dashboard statistics. This cannot be undone.",
+      "resetDataConfirm": "Yes, reset all data",
+      "resetDataCancel": "Cancel"
     }
   }
 }

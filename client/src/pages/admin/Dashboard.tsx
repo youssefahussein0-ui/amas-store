@@ -1,13 +1,44 @@
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
-import { useAdminStats } from "@/hooks/use-admin";
-import { DollarSign, Package, ShoppingCart, Loader2, TrendingUp } from "lucide-react";
+import { useAdminStats, useClearAllData } from "@/hooks/use-admin";
+import { DollarSign, Package, ShoppingCart, Loader2, TrendingUp, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useAdminStats();
+  const clearData = useClearAllData();
   const { t } = useLanguage();
+  const { toast } = useToast();
+
+  const handleResetData = async () => {
+    try {
+      await clearData.mutateAsync();
+      toast({
+        title: "Success",
+        description: "All test data has been cleared.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to clear data.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const stats_items = [
     {
@@ -35,17 +66,42 @@ export default function AdminDashboard() {
       <AdminSidebar />
       
       <main className="flex-1 p-8 overflow-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="mb-2 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-secondary" />
-            <span className="text-sm text-muted-foreground uppercase tracking-wide font-medium">{t("admin.dashboard.analytics")}</span>
-          </div>
-          <h1 className="text-4xl font-serif text-primary mb-10">{t("admin.dashboard.title")}</h1>
-        </motion.div>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-secondary" />
+              <span className="text-sm text-muted-foreground uppercase tracking-wide font-medium">{t("admin.dashboard.analytics")}</span>
+            </div>
+            <h1 className="text-4xl font-serif text-primary">{t("admin.dashboard.title")}</h1>
+          </motion.div>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="text-destructive hover:bg-destructive hover:text-white border-destructive/50 gap-2">
+                <Trash2 className="w-4 h-4" />
+                {t("admin.orders.resetData")}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("admin.orders.resetDataTitle")}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("admin.orders.resetDataDescription")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("admin.orders.resetDataCancel")}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleResetData} className="bg-destructive text-white hover:bg-destructive/90">
+                  {t("admin.orders.resetDataConfirm")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
 
         {isLoading ? (
           <div className="flex h-64 items-center justify-center">
