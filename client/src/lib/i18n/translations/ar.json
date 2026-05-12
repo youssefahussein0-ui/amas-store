@@ -213,7 +213,15 @@
       "shipped": "تم الشحن",
       "delivered": "تم التوصيل",
       "cancelled": "ملغي",
-      "noOrders": "لم يتم العثور على طلبات."
+      "noOrders": "لم يتم العثور على طلبات.",
+      "viewDetails": "عرض التفاصيل",
+      "orderDetails": "تفاصيل الطلب",
+      "items": "المنتجات",
+      "product": "المنتج",
+      "price": "السعر",
+      "quantity": "الكمية",
+      "size": "المقاس",
+      "color": "اللون"
     }
   }
 }

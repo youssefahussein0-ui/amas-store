@@ -1,7 +1,10 @@
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import { useOrders, useUpdateOrderStatus } from "@/hooks/use-orders";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { convertGoogleDriveLink } from "@/lib/utils";
 
 export default function AdminOrders() {
   const { data: orders, isLoading } = useOrders();
@@ -28,6 +31,7 @@ export default function AdminOrders() {
                 <tr>
                   <th className="px-6 py-4">{t("admin.orders.orderId")}</th>
                   <th className="px-6 py-4">{t("admin.orders.customer")}</th>
+                  <th className="px-6 py-4">{t("admin.orders.items")}</th>
                   <th className="px-6 py-4">{t("admin.orders.amount")}</th>
                   <th className="px-6 py-4">{t("admin.orders.method")}</th>
                   <th className="px-6 py-4">{t("admin.orders.status")}</th>
@@ -39,13 +43,100 @@ export default function AdminOrders() {
                   <tr key={o.id} className="border-b border-border/50 hover:bg-muted/10 transition-colors">
                     <td className="px-6 py-4 font-mono font-medium">#{o.id}</td>
                     <td className="px-6 py-4">
-                      <div>{o.customerName}</div>
+                      <div className="font-medium">{o.customerName}</div>
                       <div className="text-xs text-muted-foreground">{o.customerPhone}</div>
+                      <div className="text-xs text-muted-foreground italic">{o.deliveryAddress}</div>
+                      <div className="text-xs text-muted-foreground font-bold">{o.region}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="gap-2 text-xs h-8">
+                            <Eye className="w-3.5 h-3.5" />
+                            {o.items?.length || 0} {t("admin.orders.items")}
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="font-serif text-2xl flex items-center gap-2">
+                              {t("admin.orders.orderDetails")} #{o.id}
+                            </DialogTitle>
+                          </DialogHeader>
+                          
+                          <div className="mt-4 space-y-6">
+                            <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg text-sm">
+                              <div>
+                                <p className="text-muted-foreground uppercase text-[10px] font-bold tracking-wider mb-1">{t("admin.orders.customer")}</p>
+                                <p className="font-medium">{o.customerName}</p>
+                                <p className="text-xs">{o.customerPhone}</p>
+                                <p className="text-xs">{o.customerEmail}</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground uppercase text-[10px] font-bold tracking-wider mb-1">{t("checkout.deliveryAddress")}</p>
+                                <p className="text-xs leading-relaxed">{o.deliveryAddress}</p>
+                                <p className="text-xs font-bold mt-1">{o.region}</p>
+                              </div>
+                            </div>
+
+                            <div className="space-y-4">
+                              <h3 className="font-serif text-lg border-b pb-2">{t("admin.orders.items")}</h3>
+                              <div className="space-y-3">
+                                {o.items?.map((item: any, idx: number) => (
+                                  <div key={idx} className="flex gap-4 p-3 border rounded-lg hover:bg-muted/10 transition-colors">
+                                    <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 border bg-white">
+                                      <img 
+                                        src={convertGoogleDriveLink(item.product?.imageUrl || "")} 
+                                        alt={item.product?.name} 
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium text-sm truncate">{item.product?.name}</p>
+                                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                                        <p className="text-xs text-muted-foreground">
+                                          <span className="font-semibold">{t("admin.orders.quantity")}:</span> {item.quantity}
+                                        </p>
+                                        {item.size && (
+                                          <p className="text-xs text-muted-foreground">
+                                            <span className="font-semibold">{t("admin.orders.size")}:</span> {item.size}
+                                          </p>
+                                        )}
+                                        {item.color && (
+                                          <p className="text-xs text-muted-foreground">
+                                            <span className="font-semibold">{t("admin.orders.color")}:</span> {item.color}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="text-right flex-shrink-0">
+                                      <p className="font-medium text-sm">{Number(item.price).toFixed(2)} {t("product.currency")}</p>
+                                      <p className="text-[10px] text-muted-foreground mt-1">
+                                        {t("admin.orders.total")}: {(Number(item.price) * item.quantity).toFixed(2)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="flex justify-between items-center pt-4 border-t">
+                              <div className="text-sm">
+                                <span className="text-muted-foreground">{t("admin.orders.method")}:</span>
+                                <span className="ml-2 font-medium uppercase">{o.paymentMethod}</span>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">{t("admin.orders.amount")}</p>
+                                <p className="text-2xl font-serif text-primary">{Number(o.totalAmount).toFixed(2)} {t("product.currency")}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </td>
                     <td className="px-6 py-4 font-medium text-primary">{Number(o.totalAmount).toFixed(2)} {t("product.currency")}</td>
-                    <td className="px-6 py-4 uppercase text-xs">{o.paymentMethod}</td>
+                    <td className="px-6 py-4 uppercase text-xs font-semibold tracking-tight">{o.paymentMethod}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
                         o.status === 'pending' ? 'bg-amber-100 text-amber-800' :
                         o.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
                         o.status === 'delivered' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
@@ -55,7 +146,7 @@ export default function AdminOrders() {
                     </td>
                     <td className="px-6 py-4">
                       <select 
-                        className="text-xs border-border rounded p-1"
+                        className="text-xs border-border rounded p-1.5 bg-muted/20 focus:ring-1 focus:ring-primary outline-none transition-all"
                         value={o.status}
                         onChange={(e) => handleStatusChange(o.id, e.target.value)}
                         disabled={updateStatus.isPending}
@@ -70,7 +161,7 @@ export default function AdminOrders() {
                 ))}
                 {(!orders || orders.length === 0) && (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                    <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground font-serif italic text-lg">
                       {t("admin.orders.noOrders")}
                     </td>
                   </tr>

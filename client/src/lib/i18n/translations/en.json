@@ -213,7 +213,15 @@
       "shipped": "Shipped",
       "delivered": "Delivered",
       "cancelled": "Cancelled",
-      "noOrders": "No orders found."
+      "noOrders": "No orders found.",
+      "viewDetails": "View Details",
+      "orderDetails": "Order Details",
+      "items": "Items",
+      "product": "Product",
+      "price": "Price",
+      "quantity": "Qty",
+      "size": "Size",
+      "color": "Color"
     }
   }
 }
