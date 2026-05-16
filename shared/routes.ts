@@ -174,16 +174,16 @@ export const api = {
       path: '/api/admin/stats' as const,
       responses: {
         200: z.object({
-          totalOrders: z.number(),
-          totalRevenue: z.number(),
-          totalProducts: z.number(),
-          totalVisits: z.number().optional().default(0),
+          totalOrders: z.coerce.number(),
+          totalRevenue: z.coerce.number(),
+          totalProducts: z.coerce.number(),
+          totalVisits: z.coerce.number().optional().default(0),
           mostViewedProducts: z.array(z.any()).optional().default([]),
           bestSellingProducts: z.array(z.any()).optional().default([]),
           dailyStats: z.array(z.object({
             date: z.string(),
-            orders: z.number(),
-            revenue: z.number(),
+            orders: z.coerce.number(),
+            revenue: z.coerce.number(),
           })).optional().default([]),
         }),
       },
