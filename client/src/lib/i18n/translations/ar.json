@@ -267,5 +267,9 @@
       "resetDataConfirm": "نعم، قم بالتصفير",
       "resetDataCancel": "إلغاء"
     }
+  },
+  "common": {
+    "submit": "إرسال التقييم",
+    "name": "الاسم"
   }
 }

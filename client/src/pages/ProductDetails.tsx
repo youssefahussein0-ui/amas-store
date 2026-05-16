@@ -394,7 +394,7 @@ export default function ProductDetails() {
                   <h3 className="text-xl font-serif text-primary mb-6">{t("product.writeReview") || "Write a Review"}</h3>
                   <form onSubmit={handleSubmitReview} className="space-y-4">
                     <div className="space-y-2">
-                      <Label className="text-xs uppercase tracking-wider">{t("checkout.name")}</Label>
+                      <Label className="text-xs uppercase tracking-wider">{t("common.name")}</Label>
                       <Input 
                         required 
                         value={newReview.customerName} 
@@ -431,7 +431,7 @@ export default function ProductDetails() {
                       disabled={isSubmittingReview} 
                       className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                     >
-                      {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : (t("common.submit") || "Submit Review")}
+                      {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : t("common.submit")}
                     </Button>
                   </form>
                 </Card>

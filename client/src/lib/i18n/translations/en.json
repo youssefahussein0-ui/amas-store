@@ -266,5 +266,9 @@
       "resetDataConfirm": "Yes, reset all data",
       "resetDataCancel": "Cancel"
     }
+  },
+  "common": {
+    "submit": "Submit Review",
+    "name": "Name"
   }
 }
