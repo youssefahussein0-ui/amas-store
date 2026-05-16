@@ -114,97 +114,98 @@ export default function AdminDashboard() {
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
           </div>
         ) : stats ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {stats_items.map((item, index) => {
-              const Icon = item.icon;
-              return (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <Card className="border-secondary/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover-elevate bg-gradient-to-br from-card to-card/80">
-                    <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">{item.title}</CardTitle>
-                      <div className="p-2 bg-secondary/10 rounded-lg">
-                        <Icon className={`h-5 w-5 ${item.color}`} />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-serif text-primary font-bold">{item.value}</div>
-                      <p className="text-xs text-muted-foreground mt-2">{t("admin.dashboard.realtime")}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
-              <Card className="border-secondary/20 shadow-xl bg-gradient-to-br from-card to-card/80">
-                <CardHeader>
-                  <CardTitle className="text-lg font-serif text-primary flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-secondary" />
-                    {t("admin.dashboard.bestSellers") || "Best Selling Products"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {stats?.bestSellingProducts?.length > 0 ? stats.bestSellingProducts.map((p: any) => (
-                      <div key={p.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border/50">
-                        <div className="flex items-center gap-3">
-                          <img src={p.imageUrl} alt={p.name} className="w-10 h-10 rounded object-cover" />
-                          <div>
-                            <p className="font-medium text-sm">{p.name}</p>
-                            <p className="text-xs text-muted-foreground">{p.totalSold} sold</p>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {stats_items.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                  >
+                    <Card className="border-secondary/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover-elevate bg-gradient-to-br from-card to-card/80">
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">{item.title}</CardTitle>
+                        <div className="p-2 bg-secondary/10 rounded-lg">
+                          <Icon className={`h-5 w-5 ${item.color}`} />
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-serif text-primary font-bold">{item.value}</div>
+                        <p className="text-xs text-muted-foreground mt-2">{t("admin.dashboard.realtime")}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
+                <Card className="border-secondary/20 shadow-xl bg-gradient-to-br from-card to-card/80">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-serif text-primary flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-secondary" />
+                      {t("admin.dashboard.bestSellers") || "Best Selling Products"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {stats?.bestSellingProducts?.length > 0 ? stats.bestSellingProducts.map((p: any) => (
+                        <div key={p.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border/50">
+                          <div className="flex items-center gap-3">
+                            <img src={p.imageUrl} alt={p.name} className="w-10 h-10 rounded object-cover" />
+                            <div>
+                              <p className="font-medium text-sm">{p.name}</p>
+                              <p className="text-xs text-muted-foreground">{p.totalSold} sold</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-primary">{p.totalRevenue.toFixed(2)} {t("product.currency")}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-primary">{p.totalRevenue.toFixed(2)} {t("product.currency")}</p>
-                        </div>
-                      </div>
-                    )) : (
-                      <p className="text-sm text-muted-foreground text-center py-4">No sales data yet</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }}>
-              <Card className="border-secondary/20 shadow-xl bg-gradient-to-br from-card to-card/80">
-                <CardHeader>
-                  <CardTitle className="text-lg font-serif text-primary flex items-center gap-2">
-                    <Eye className="w-5 h-5 text-secondary" />
-                    {t("admin.dashboard.mostViewed") || "Most Viewed Products"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {stats?.mostViewedProducts?.length > 0 ? stats.mostViewedProducts.map((p: any) => (
-                      <div key={p.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border/50">
-                        <div className="flex items-center gap-3">
-                          <img src={p.imageUrl} alt={p.name} className="w-10 h-10 rounded object-cover" />
-                          <div>
-                            <p className="font-medium text-sm">{p.name}</p>
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                              <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {p.views || 0}</span>
-                              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {Math.round((p.timeSpent || 0) / 60)} min</span>
+                      )) : (
+                        <p className="text-sm text-muted-foreground text-center py-4">No sales data yet</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+  
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }}>
+                <Card className="border-secondary/20 shadow-xl bg-gradient-to-br from-card to-card/80">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-serif text-primary flex items-center gap-2">
+                      <Eye className="w-5 h-5 text-secondary" />
+                      {t("admin.dashboard.mostViewed") || "Most Viewed Products"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {stats?.mostViewedProducts?.length > 0 ? stats.mostViewedProducts.map((p: any) => (
+                        <div key={p.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border/50">
+                          <div className="flex items-center gap-3">
+                            <img src={p.imageUrl} alt={p.name} className="w-10 h-10 rounded object-cover" />
+                            <div>
+                              <p className="font-medium text-sm">{p.name}</p>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {p.views || 0}</span>
+                                <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {Math.round((p.timeSpent || 0) / 60)} min</span>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    )) : (
-                      <p className="text-sm text-muted-foreground text-center py-4">No view data yet</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-          
+                      )) : (
+                        <p className="text-sm text-muted-foreground text-center py-4">No view data yet</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+          </>
         ) : (
           <div className="text-center text-muted-foreground py-10">{t("admin.dashboard.failedStats")}</div>
         )}
