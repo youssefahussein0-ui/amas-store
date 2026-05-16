@@ -22,6 +22,7 @@ import Orders from "./pages/admin/Orders";
 import Leads from "./pages/admin/Leads";
 import PromoCodes from "./pages/admin/PromoCodes";
 import AbandonedCarts from "./pages/admin/AbandonedCarts";
+import Reviews from "./pages/admin/Reviews";
 import { ProtectedAdminRoute } from "@/components/layout/ProtectedAdminRoute";
 import { ErrorBoundary } from "@/components/layout/ErrorBoundary";
 
@@ -57,6 +58,9 @@ function Router() {
       </Route>
       <Route path="/admin/abandoned-carts">
         {() => <ProtectedAdminRoute><AbandonedCarts /></ProtectedAdminRoute>}
+      </Route>
+      <Route path="/admin/reviews">
+        {() => <ProtectedAdminRoute><Reviews /></ProtectedAdminRoute>}
       </Route>
 
       {/* Fallback to 404 */}

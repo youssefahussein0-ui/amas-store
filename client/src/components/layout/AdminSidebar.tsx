@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, ShoppingCart, LogOut, Layers, Gift, Tag, ShoppingBag } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, LogOut, Layers, Gift, Tag, ShoppingBag, MessageSquare } from "lucide-react";
 import { useAdminAuth } from "@/hooks/use-admin-auth";
 import logoImg from "@assets/image_1772919891991.png";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -16,6 +16,7 @@ export function AdminSidebar() {
     { name: t("admin.sidebar.orders"), path: "/admin/orders", icon: ShoppingCart },
     { name: t("admin.sidebar.promo") || "Promo Codes", path: "/admin/promo-codes", icon: Tag },
     { name: t("admin.sidebar.abandoned") || "Abandoned Carts", path: "/admin/abandoned-carts", icon: ShoppingBag },
+    { name: t("admin.sidebar.reviews") || "Reviews", path: "/admin/reviews", icon: MessageSquare },
     { name: "Spin Leads", path: "/admin/leads", icon: Gift },
   ];
 
