@@ -94,6 +94,13 @@ export default function AdminOrders() {
                               <div>
                                 <p className="text-muted-foreground uppercase text-[10px] font-bold tracking-wider mb-1">{t("checkout.deliveryAddress")}</p>
                                 <p className="text-xs leading-relaxed">{o.customerAddress}</p>
+                                {o.city && <p className="text-xs text-muted-foreground mt-1">City: {o.city} | Street: {o.street}</p>}
+                                {o.building && <p className="text-xs text-muted-foreground">Bldg: {o.building} | Floor: {o.floor || "-"} | Apt: {o.apartment || "-"}</p>}
+                                {o.specialInstructions && (
+                                  <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded text-amber-800 text-xs">
+                                    <strong>Note:</strong> {o.specialInstructions}
+                                  </div>
+                                )}
                               </div>
                             </div>
 
@@ -142,6 +149,11 @@ export default function AdminOrders() {
                               <div className="text-sm">
                                 <span className="text-muted-foreground">{t("admin.orders.method")}:</span>
                                 <span className="ml-2 font-medium uppercase">{o.paymentMethod}</span>
+                                {(o.paymentMethod === 'instapay' || o.paymentMethod === 'vodafone_cash') && o.transferPhone && (
+                                  <div className="mt-1 text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded px-2 py-1 inline-block">
+                                    Transfer Phone: <strong>{o.transferPhone}</strong>
+                                  </div>
+                                )}
                               </div>
                               <div className="text-right">
                                 <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">{t("admin.orders.amount")}</p>

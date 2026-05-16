@@ -41,9 +41,15 @@ export default function Checkout() {
     name: "",
     phone: "",
     email: "",
-    address: "",
+    region: "",
+    city: "",
+    street: "",
+    building: "",
+    apartment: "",
+    floor: "",
+    specialInstructions: "",
     paymentMethod: "cod",
-    region: ""
+    transferPhone: ""
   });
 
   const selectedRegion = REGIONS.find(r => r.id === formData.region);
@@ -92,10 +98,19 @@ export default function Checkout() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.phone || !formData.address || !formData.region) {
+    if (!formData.name || !formData.phone || !formData.region || !formData.city || !formData.street || !formData.building) {
       toast({
         title: t("admin.login.error"),
-        description: t("checkout.fillAllFields"),
+        description: t("checkout.fillAllFields") || "Please fill all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if ((formData.paymentMethod === "instapay" || formData.paymentMethod === "vodafone_cash") && !formData.transferPhone) {
+      toast({
+        title: t("admin.login.error"),
+        description: "Please enter the phone number you transferred from.",
         variant: "destructive"
       });
       return;
@@ -114,8 +129,15 @@ export default function Checkout() {
       customerName: formData.name,
       customerPhone: formData.phone,
       customerEmail: formData.email || null,
-      customerAddress: `${t(`regions.${formData.region}`)} - ${formData.address}`,
+      customerAddress: `${t(`regions.${formData.region}`)} - ${formData.city}, ${formData.street}, Bldg: ${formData.building}`,
+      city: formData.city,
+      street: formData.street,
+      building: formData.building,
+      floor: formData.floor || null,
+      apartment: formData.apartment || null,
+      specialInstructions: formData.specialInstructions || null,
       paymentMethod: formData.paymentMethod,
+      transferPhone: formData.transferPhone || null,
       totalAmount: finalTotal.toString(),
       items: items.map(item => ({
         productId: item.product.id,
@@ -229,15 +251,69 @@ export default function Checkout() {
                     </Select>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="city">{t("checkout.city") || "City/Area"} *</Label>
+                      <Input 
+                        id="city" 
+                        required 
+                        value={formData.city}
+                        onChange={e => setFormData({...formData, city: e.target.value})}
+                        className="bg-background focus-visible:ring-primary" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="street">{t("checkout.street") || "Street Name"} *</Label>
+                      <Input 
+                        id="street" 
+                        required 
+                        value={formData.street}
+                        onChange={e => setFormData({...formData, street: e.target.value})}
+                        className="bg-background focus-visible:ring-primary" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="building">{t("checkout.building") || "Building"} *</Label>
+                      <Input 
+                        id="building" 
+                        required 
+                        value={formData.building}
+                        onChange={e => setFormData({...formData, building: e.target.value})}
+                        className="bg-background focus-visible:ring-primary" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="floor">{t("checkout.floor") || "Floor"}</Label>
+                      <Input 
+                        id="floor" 
+                        value={formData.floor}
+                        onChange={e => setFormData({...formData, floor: e.target.value})}
+                        className="bg-background focus-visible:ring-primary" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="apartment">{t("checkout.apartment") || "Apt/Flat"}</Label>
+                      <Input 
+                        id="apartment" 
+                        value={formData.apartment}
+                        onChange={e => setFormData({...formData, apartment: e.target.value})}
+                        className="bg-background focus-visible:ring-primary" 
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="address">{t("checkout.deliveryAddress")}</Label>
+                    <Label htmlFor="specialInstructions">{t("checkout.specialInstructions") || "Special Instructions"}</Label>
                     <textarea 
-                      id="address" 
-                      required 
-                      rows={3}
-                      value={formData.address}
-                      onChange={e => setFormData({...formData, address: e.target.value})}
+                      id="specialInstructions" 
+                      rows={2}
+                      value={formData.specialInstructions}
+                      onChange={e => setFormData({...formData, specialInstructions: e.target.value})}
                       className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
+                      placeholder={t("checkout.specialInstructionsPlaceholder") || "Any special delivery instructions?"}
                     />
                   </div>
                 </div>
@@ -255,14 +331,43 @@ export default function Checkout() {
                       <Label htmlFor="cod" className="font-medium cursor-pointer">{t("checkout.cod")}</Label>
                     </div>
                     <div className="flex items-center space-x-3 border border-border p-4 rounded-md">
-                      <RadioGroupItem value="bank" id="bank" />
-                      <Label htmlFor="bank" className="font-medium cursor-pointer">{t("checkout.bankTransfer")}</Label>
+                      <RadioGroupItem value="instapay" id="instapay" />
+                      <Label htmlFor="instapay" className="font-medium cursor-pointer flex flex-col">
+                        <span>InstaPay (إنستاباي)</span>
+                        <span className="text-xs text-muted-foreground mt-1">Transfer to: instapay@amas</span>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-3 border border-border p-4 rounded-md">
+                      <RadioGroupItem value="vodafone_cash" id="vodafone_cash" />
+                      <Label htmlFor="vodafone_cash" className="font-medium cursor-pointer flex flex-col">
+                        <span>Vodafone Cash (فودافون كاش)</span>
+                        <span className="text-xs text-muted-foreground mt-1">Transfer to: 01012345678</span>
+                      </Label>
                     </div>
                     <div className="flex items-center space-x-3 border border-border p-4 rounded-md">
                       <RadioGroupItem value="card" id="card" />
                       <Label htmlFor="card" className="font-medium cursor-pointer">{t("checkout.creditCard")}</Label>
                     </div>
                   </RadioGroup>
+
+                  {(formData.paymentMethod === "instapay" || formData.paymentMethod === "vodafone_cash") && (
+                    <div className="space-y-2 mt-4 p-4 bg-secondary/10 rounded-md border border-secondary/20">
+                      <Label htmlFor="transferPhone" className="text-secondary-foreground font-semibold">
+                        {t("checkout.transferPhone") || "Phone Number you transferred from"} *
+                      </Label>
+                      <Input 
+                        id="transferPhone" 
+                        required 
+                        value={formData.transferPhone}
+                        onChange={e => setFormData({...formData, transferPhone: e.target.value})}
+                        className="bg-white border-secondary/30 focus-visible:ring-secondary" 
+                        placeholder="01xxxxxxxxx"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        We need this to verify your payment.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <Button 

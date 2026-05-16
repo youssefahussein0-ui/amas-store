@@ -31,10 +31,18 @@ export const orders = pgTable("orders", {
   customerName: text("customer_name").notNull(),
   customerPhone: text("customer_phone").notNull(),
   customerEmail: text("customer_email"),
-  customerAddress: text("customer_address").notNull(),
+  customerAddress: text("customer_address"), // Legacy/combined address
+  city: text("city"),
+  street: text("street"),
+  building: text("building"),
+  apartment: text("apartment"),
+  floor: text("floor"),
+  specialInstructions: text("special_instructions"),
   status: text("status").notNull().default("pending"),
   totalAmount: numeric("total_amount").notNull(),
-  paymentMethod: text("payment_method").notNull(),
+  paymentMethod: text("payment_method").notNull(), // cash_on_delivery, instapay, vodafone_cash, card
+  transferPhone: text("transfer_phone"),
+  paymentReceiptUrl: text("payment_receipt_url"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
