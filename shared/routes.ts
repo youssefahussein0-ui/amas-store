@@ -239,8 +239,6 @@ export const api = {
       },
     },
   },
-    },
-  },
   promoCodes: {
     list: {
       method: 'GET' as const,
