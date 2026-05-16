@@ -305,6 +305,45 @@ export const api = {
         200: z.any(),
       },
     },
+  },
+  reviews: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/reviews' as const,
+      responses: {
+        200: z.array(z.any()),
+      },
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/reviews' as const,
+      input: z.object({
+        productId: z.number(),
+        rating: z.number().min(1).max(5),
+        customerName: z.string(),
+        comment: z.string(),
+      }),
+      responses: {
+        201: z.any(),
+        400: errorSchemas.validation,
+      },
+    },
+    delete: {
+      method: 'DELETE' as const,
+      path: '/api/reviews/:id' as const,
+      responses: {
+        204: z.void(),
+        404: errorSchemas.notFound,
+      },
+    },
+    approve: {
+      method: 'PATCH' as const,
+      path: '/api/reviews/:id/approve' as const,
+      responses: {
+        200: z.any(),
+        404: errorSchemas.notFound,
+      },
+    },
   }
 };
 

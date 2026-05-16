@@ -34,21 +34,30 @@
     "bestSellers": "Best Sellers"
   },
   "shop": {
-    "title": "Shop Collection",
-    "subtitle": "Explore our complete collection of handcrafted luxury jewelry. Each piece is designed to make a statement.",
+    "title": "Shop",
+    "subtitle": "Discover our full range of handcrafted luxury jewelry.",
     "noProducts": "No products found",
-    "noProductsHint": "Try selecting a different category."
+    "noProductsHint": "Try changing the category or search criteria.",
+    "sort": {
+      "newest": "Newest",
+      "priceLow": "Price: Low to High",
+      "priceHigh": "Price: High to Low"
+    }
   },
   "product": {
     "new": "New",
     "bestSeller": "Best Seller",
     "quickView": "Quick View",
     "addToCart": "Add to Cart",
-    "buyNow": "Buy Now",
-    "soldOut": "Sold Out",
-    "viewFullDetails": "View Full Details",
     "addedToCart": "Added to Cart",
-    "addedToCartDesc": "has been added to your cart.",
+    "addedToCartDesc": "Successfully",
+    "reviews": "Customer Reviews",
+    "noReviews": "No reviews yet. Be the first to review!",
+    "writeReview": "Write a Review",
+    "rating": "Rating",
+    "comment": "Your Review",
+    "buyNow": "Buy Now",
+    "viewFullDetails": "View Full Details",
     "notFound": "Product not found.",
     "materials": "Materials",
     "lifetimeWarranty": "Lifetime Warranty",

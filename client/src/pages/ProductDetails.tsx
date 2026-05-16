@@ -4,13 +4,16 @@ import { Footer } from "@/components/layout/Footer";
 import { useProduct, useProducts } from "@/hooks/use-products";
 import { useCart } from "@/hooks/use-cart";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ShoppingCart, ShieldCheck, Truck, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ShoppingCart, ShieldCheck, Truck, RefreshCw, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useCategories } from "@/hooks/use-categories";
 import { convertGoogleDriveLink, cn, trackEvent } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1000&auto=format&fit=crop";
 
@@ -27,22 +30,48 @@ export default function ProductDetails() {
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [activeImage, setActiveImage] = useState<string>("");
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: "", customerName: "" });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const { t } = useLanguage();
 
-  useEffect(() => {
-    if (product) {
-      setActiveImage(product.imageUrl);
-      // Set first size as default if available
-      if (product.sizes) {
-        const sizes = product.sizes.split(",").map(s => s.trim());
-        if (sizes.length > 0) setSelectedSize(sizes[0]);
-      }
-      if (product.colors) {
-        const colors = product.colors.split(",").map(s => s.trim());
-        if (colors.length > 0) setSelectedColor(colors[0]);
-      }
     }
   }, [product]);
+
+  const fetchReviews = async () => {
+    try {
+      const res = await fetch(`${api.reviews.list.path}?productId=${productId}`);
+      const data = await res.json();
+      setReviews(data.filter((r: any) => r.isApproved));
+    } catch (err) {
+      console.error("Failed to fetch reviews", err);
+    }
+  };
+
+  useEffect(() => {
+    if (productId) fetchReviews();
+  }, [productId]);
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReview.customerName || !newReview.comment) return;
+    setIsSubmittingReview(true);
+    try {
+      const res = await fetch(api.reviews.create.path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...newReview, productId })
+      });
+      if (!res.ok) throw new Error("Failed to submit review");
+      toast({ title: "Review Submitted", description: "Thank you for your feedback!" });
+      setNewReview({ rating: 5, comment: "", customerName: "" });
+      fetchReviews();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   useEffect(() => {
     if (!product) return;
@@ -319,6 +348,82 @@ export default function ProductDetails() {
                 </div>
               </div>
 
+            </div>
+          </div>
+
+          {/* Reviews Section */}
+          <div className="border-t border-border pt-20 mb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+              <div className="lg:col-span-2">
+                <h2 className="text-3xl font-serif text-primary mb-8">{t("product.reviews") || "Customer Reviews"}</h2>
+                <div className="space-y-8">
+                  {reviews.map((review, i) => (
+                    <div key={review.id || i} className="border-b border-border pb-6 last:border-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-primary">{review.customerName}</span>
+                        <div className="flex gap-0.5">
+                          {[...Array(5)].map((_, idx) => (
+                            <Star key={idx} className={cn("w-3.5 h-3.5", idx < review.rating ? "fill-secondary text-secondary" : "text-muted")} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-muted-foreground font-light text-sm">{review.comment}</p>
+                      <span className="text-[10px] text-muted-foreground/60 mt-2 block italic">{new Date(review.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  ))}
+                  {reviews.length === 0 && (
+                    <p className="text-muted-foreground italic text-center py-8">{t("product.noReviews") || "No reviews yet. Be the first to review!"}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Card className="p-6 bg-muted/10 border-none shadow-none">
+                  <h3 className="text-xl font-serif text-primary mb-6">{t("product.writeReview") || "Write a Review"}</h3>
+                  <form onSubmit={handleSubmitReview} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-wider">{t("checkout.name")}</Label>
+                      <Input 
+                        required 
+                        value={newReview.customerName} 
+                        onChange={e => setNewReview({...newReview, customerName: e.target.value})}
+                        className="bg-background"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-wider">{t("product.rating") || "Rating"}</Label>
+                      <div className="flex gap-2">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <button 
+                            key={star} 
+                            type="button"
+                            onClick={() => setNewReview({...newReview, rating: star})}
+                            className="transition-transform hover:scale-110"
+                          >
+                            <Star className={cn("w-6 h-6", star <= newReview.rating ? "fill-secondary text-secondary" : "text-muted")} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-wider">{t("product.comment") || "Your Review"}</Label>
+                      <textarea 
+                        required
+                        value={newReview.comment}
+                        onChange={e => setNewReview({...newReview, comment: e.target.value})}
+                        className="w-full min-h-[100px] p-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      disabled={isSubmittingReview} 
+                      className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                    >
+                      {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : (t("common.submit") || "Submit Review")}
+                    </Button>
+                  </form>
+                </Card>
+              </div>
             </div>
           </div>
 

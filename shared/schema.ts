@@ -151,3 +151,18 @@ export const abandonedCarts = pgTable("abandoned_carts", {
 export const insertAbandonedCartSchema = createInsertSchema(abandonedCarts).omit({ id: true, createdAt: true, recovered: true });
 export type AbandonedCart = typeof abandonedCarts.$inferSelect;
 export type InsertAbandonedCart = z.infer<typeof insertAbandonedCartSchema>;
+
+// Phase 3: Reviews
+export const reviews = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  rating: integer("rating").notNull(),
+  customerName: text("customer_name").notNull(),
+  comment: text("comment").notNull(),
+  isApproved: boolean("is_approved").default(true), // Defaulting to true for now, can be changed later
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;

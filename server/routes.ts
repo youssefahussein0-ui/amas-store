@@ -359,6 +359,39 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.json(cart);
   });
 
+  // Reviews
+  app.get(api.reviews.list.path, async (req, res) => {
+    const productId = req.query.productId ? Number(req.query.productId) : undefined;
+    const reviews = await storage.getReviews(productId);
+    res.json(reviews);
+  });
+
+  app.post(api.reviews.create.path, async (req, res) => {
+    try {
+      const input = api.reviews.create.input.parse(req.body);
+      const review = await storage.createReview(input);
+      res.status(201).json(review);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
+  app.delete(api.reviews.delete.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    const id = Number(req.params.id);
+    const success = await storage.deleteReview(id);
+    if (!success) return res.status(404).json({ message: "Review not found" });
+    res.status(204).end();
+  });
+
+  app.patch(api.reviews.approve.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    const id = Number(req.params.id);
+    await storage.approveReview(id);
+    res.json({ success: true });
+  });
+
   // Analytics
   app.post(api.analytics.visit.path, async (req, res) => {
     try {

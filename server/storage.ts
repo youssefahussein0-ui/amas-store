@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { products, orders, orderItems, adminUsers, categories, leads, siteVisits, promoCodes, abandonedCarts, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead, type PromoCode, type InsertPromoCode, type AbandonedCart, type InsertAbandonedCart } from "@shared/schema";
+import { products, orders, orderItems, adminUsers, categories, leads, siteVisits, promoCodes, abandonedCarts, reviews, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead, type PromoCode, type InsertPromoCode, type AbandonedCart, type InsertAbandonedCart, type Review, type InsertReview } from "@shared/schema";
 import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
@@ -44,6 +44,11 @@ export interface IStorage {
   getAbandonedCarts(): Promise<AbandonedCart[]>;
   upsertAbandonedCart(sessionId: string, cartData: string, customerPhone?: string, customerEmail?: string): Promise<AbandonedCart>;
   markCartRecovered(sessionId: string): Promise<void>;
+
+  getReviews(productId?: number): Promise<Review[]>;
+  createReview(review: InsertReview): Promise<Review>;
+  deleteReview(id: number): Promise<boolean>;
+  approveReview(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -278,6 +283,28 @@ export class DatabaseStorage implements IStorage {
 
   async markCartRecovered(sessionId: string): Promise<void> {
     await db.update(abandonedCarts).set({ recovered: true }).where(eq(abandonedCarts.sessionId, sessionId));
+  }
+
+  // Phase 3: Reviews
+  async getReviews(productId?: number): Promise<Review[]> {
+    if (productId) {
+      return await db.select().from(reviews).where(eq(reviews.productId, productId)).orderBy(desc(reviews.createdAt));
+    }
+    return await db.select().from(reviews).orderBy(desc(reviews.createdAt));
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db.insert(reviews).values(insertReview).returning();
+    return review;
+  }
+
+  async deleteReview(id: number): Promise<boolean> {
+    const [deleted] = await db.delete(reviews).where(eq(reviews.id, id)).returning();
+    return !!deleted;
+  }
+
+  async approveReview(id: number): Promise<void> {
+    await db.update(reviews).set({ isApproved: true }).where(eq(reviews.id, id));
   }
 }
 

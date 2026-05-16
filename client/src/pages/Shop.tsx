@@ -18,6 +18,8 @@ export default function Shop() {
   const { t, language } = useLanguage();
 
   const [activeCategory, setActiveCategory] = useState<string>(categoryQuery || "All");
+  const [sortBy, setSortBy] = useState<string>("newest");
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
 
   useEffect(() => {
     setActiveCategory(categoryQuery || "All");
@@ -53,10 +55,23 @@ export default function Shop() {
     const targetCategoryName = categoryObj ? categoryObj.nameEn : activeCategory;
 
     return products.filter(p => 
-      p.category.trim().toLowerCase() === targetCategoryName.trim().toLowerCase() ||
-      p.category.trim().toLowerCase() === activeCategory.trim().toLowerCase()
+      (p.category.trim().toLowerCase() === targetCategoryName.trim().toLowerCase() ||
+      p.category.trim().toLowerCase() === activeCategory.trim().toLowerCase()) &&
+      (Number(p.discountPrice || p.price) >= priceRange[0] && Number(p.discountPrice || p.price) <= priceRange[1])
     );
-  }, [products, activeCategory, categories]);
+  }, [products, activeCategory, categories, priceRange]);
+
+  const sortedProducts = useMemo(() => {
+    return [...filteredProducts].sort((a, b) => {
+      const priceA = Number(a.discountPrice || a.price);
+      const priceB = Number(b.discountPrice || b.price);
+      
+      if (sortBy === "price-low") return priceA - priceB;
+      if (sortBy === "price-high") return priceB - priceA;
+      if (sortBy === "newest") return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      return 0;
+    });
+  }, [filteredProducts, sortBy]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -72,20 +87,36 @@ export default function Shop() {
           </div>
 
           {/* Filter Bar */}
-          <div className="flex flex-wrap justify-center gap-4 mb-16">
-            {categoryMap.map((cat) => (
-              <button
-                key={cat.key}
-                onClick={() => handleCategoryClick(cat.key)}
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                  activeCategory.trim().toLowerCase() === cat.key.trim().toLowerCase() 
-                    ? "bg-primary text-white shadow-lg" 
-                    : "bg-white text-foreground hover:bg-muted"
-                }`}
+          <div className="flex flex-col md:flex-row gap-8 mb-16">
+            <div className="flex-1">
+              <div className="flex flex-wrap gap-4">
+                {categoryMap.map((cat) => (
+                  <button
+                    key={cat.key}
+                    onClick={() => handleCategoryClick(cat.key)}
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                      activeCategory.trim().toLowerCase() === cat.key.trim().toLowerCase() 
+                        ? "bg-primary text-white shadow-lg" 
+                        : "bg-white text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <select 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-background border border-input rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
-                {cat.label}
-              </button>
-            ))}
+                <option value="newest">{t("shop.sort.newest") || "Newest"}</option>
+                <option value="price-low">{t("shop.sort.priceLow") || "Price: Low to High"}</option>
+                <option value="price-high">{t("shop.sort.priceHigh") || "Price: High to Low"}</option>
+              </select>
+            </div>
           </div>
 
           {/* Products Grid */}
@@ -98,7 +129,7 @@ export default function Shop() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
-              {filteredProducts.map(product => (
+              {sortedProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
