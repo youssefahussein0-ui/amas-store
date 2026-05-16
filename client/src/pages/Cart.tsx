@@ -8,7 +8,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { convertGoogleDriveLink } from "@/lib/utils";
 
 export default function Cart() {
-  const { items, removeItem, updateQuantity, getCartTotal } = useCart();
+  const { items, removeItem, updateQuantity, getCartTotal, appliedDiscount, getDiscountedTotal } = useCart();
   const { t } = useLanguage();
 
   return (
@@ -31,43 +31,46 @@ export default function Cart() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
-              {items.map(item => (
-                <div key={item.product.id + (item.size || '') + (item.color || '')} className="flex gap-6 bg-white p-6 rounded-xl luxury-shadow">
-                  <img 
-                    src={convertGoogleDriveLink(item.product.imageUrl)} 
-                    alt={item.product.name} 
-                    className="w-24 h-24 object-cover rounded-lg" 
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-serif text-lg text-primary">{item.product.name}</h3>
-                    <div className="flex flex-wrap gap-4 text-muted-foreground text-sm">
-                      <p>{item.product.category}</p>
-                      {item.size && <p className="border-s ps-4 font-medium text-secondary">Size: {item.size}</p>}
-                      {item.color && <p className="border-s ps-4 font-medium text-secondary">Color: {item.color}</p>}
+              {items.map((item, idx) => {
+                if (!item.product) return null;
+                return (
+                  <div key={`${item.product.id}-${item.size || ''}-${item.color || ''}-${idx}`} className="flex gap-6 bg-white p-6 rounded-xl luxury-shadow">
+                    <img 
+                      src={convertGoogleDriveLink(item.product.imageUrl)} 
+                      alt={item.product.name} 
+                      className="w-24 h-24 object-cover rounded-lg" 
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-serif text-lg text-primary">{item.product.name}</h3>
+                      <div className="flex flex-wrap gap-4 text-muted-foreground text-sm">
+                        <p>{item.product.category}</p>
+                        {item.size && <p className="border-s ps-4 font-medium text-secondary">Size: {item.size}</p>}
+                        {item.color && <p className="border-s ps-4 font-medium text-secondary">Color: {item.color}</p>}
+                      </div>
+                      <p className="font-medium mt-2">{Number(item.product.price).toFixed(2)} {t("product.currency")}</p>
                     </div>
-                    <p className="font-medium mt-2">{Number(item.product.price).toFixed(2)} {t("product.currency")}</p>
-                  </div>
-                  <div className="flex flex-col items-end justify-between">
-                    <button 
-                      onClick={() => removeItem(item.product.id, item.size, item.color)}
-                      className="text-muted-foreground hover:text-destructive transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                    <div className="flex items-center border border-input rounded-md">
+                    <div className="flex flex-col items-end justify-between">
                       <button 
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.size, item.color)}
-                        className="px-3 py-1 hover:text-primary transition-colors"
-                      >-</button>
-                      <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                      <button 
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.size, item.color)}
-                        className="px-3 py-1 hover:text-primary transition-colors"
-                      >+</button>
+                        onClick={() => removeItem(item.product.id, item.size, item.color)}
+                        className="text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      <div className="flex items-center border border-input rounded-md">
+                        <button 
+                          onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.size, item.color)}
+                          className="px-3 py-1 hover:text-primary transition-colors"
+                        >-</button>
+                        <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                        <button 
+                          onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.size, item.color)}
+                          className="px-3 py-1 hover:text-primary transition-colors"
+                        >+</button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Summary */}
@@ -81,15 +84,15 @@ export default function Cart() {
                   <span>{t("cart.shipping")}</span>
                   <span>{t("cart.free")}</span>
                 </div>
-                {useCart.getState().appliedDiscount && (
+                {appliedDiscount && (
                   <div className="flex justify-between text-green-600 font-medium">
-                    <span>Discount ({useCart.getState().appliedDiscount}%)</span>
-                    <span>-{(getCartTotal() * (useCart.getState().appliedDiscount || 0) / 100).toFixed(2)} {t("product.currency")}</span>
+                    <span>{t("cart.discount") || "Discount"} ({appliedDiscount}%)</span>
+                    <span>-{(getCartTotal() * appliedDiscount / 100).toFixed(2)} {t("product.currency")}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-xl font-serif text-primary pt-4 border-t border-border">
                   <span>{t("cart.total")}</span>
-                  <span>{useCart.getState().getDiscountedTotal().toFixed(2)} {t("product.currency")}</span>
+                  <span>{getDiscountedTotal().toFixed(2)} {t("product.currency")}</span>
                 </div>
               </div>
               <Link href="/checkout">

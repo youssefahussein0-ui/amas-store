@@ -78,6 +78,7 @@
     "shipping": "الشحن",
     "free": "مجاني",
     "total": "المجموع الكلي",
+    "discount": "الخصم",
     "proceedToCheckout": "متابعة الدفع"
   },
   "checkout": {
