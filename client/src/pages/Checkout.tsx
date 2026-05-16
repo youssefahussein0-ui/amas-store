@@ -382,16 +382,16 @@ export default function Checkout() {
                         <span className="text-xs text-muted-foreground mt-1">{t("checkout.vodafoneCashDesc")}</span>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-3 border border-border p-4 rounded-md">
-                      <RadioGroupItem value="bank" id="bank" />
-                      <Label htmlFor="bank" className="font-medium cursor-pointer flex flex-col">
+                    <div className="flex items-center space-x-3 border border-border p-4 rounded-md opacity-50 cursor-not-allowed">
+                      <RadioGroupItem value="bank" id="bank" disabled />
+                      <Label htmlFor="bank" className="font-medium cursor-not-allowed flex flex-col">
                         <span>{t("checkout.bankTransfer")}</span>
                         <span className="text-xs text-muted-foreground mt-1">{t("checkout.bankTransferDesc")}</span>
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-3 border border-border p-4 rounded-md">
-                      <RadioGroupItem value="card" id="card" />
-                      <Label htmlFor="card" className="font-medium cursor-pointer">{t("checkout.creditCard")}</Label>
+                    <div className="flex items-center space-x-3 border border-border p-4 rounded-md opacity-50 cursor-not-allowed">
+                      <RadioGroupItem value="card" id="card" disabled />
+                      <Label htmlFor="card" className="font-medium cursor-not-allowed">{t("checkout.creditCard")}</Label>
                     </div>
                   </RadioGroup>
 
