@@ -111,10 +111,10 @@ export default function Checkout() {
       return;
     }
 
-    if ((formData.paymentMethod === "instapay" || formData.paymentMethod === "vodafone_cash") && !formData.transferPhone) {
+    if ((formData.paymentMethod === "instapay" || formData.paymentMethod === "vodafone_cash" || formData.paymentMethod === "bank") && !formData.transferPhone) {
       toast({
         title: t("admin.login.error"),
-        description: "Please enter the phone number you transferred from.",
+        description: formData.paymentMethod === "bank" ? "Please enter the account name you transferred from." : "Please enter the phone number you transferred from.",
         variant: "destructive"
       });
       return;
@@ -371,15 +371,22 @@ export default function Checkout() {
                     <div className="flex items-center space-x-3 border border-border p-4 rounded-md">
                       <RadioGroupItem value="instapay" id="instapay" />
                       <Label htmlFor="instapay" className="font-medium cursor-pointer flex flex-col">
-                        <span>InstaPay (إنستاباي)</span>
-                        <span className="text-xs text-muted-foreground mt-1">Transfer to: instapay@amas</span>
+                        <span>{t("checkout.instapay")}</span>
+                        <span className="text-xs text-muted-foreground mt-1">{t("checkout.instapayDesc")}</span>
                       </Label>
                     </div>
                     <div className="flex items-center space-x-3 border border-border p-4 rounded-md">
                       <RadioGroupItem value="vodafone_cash" id="vodafone_cash" />
                       <Label htmlFor="vodafone_cash" className="font-medium cursor-pointer flex flex-col">
-                        <span>Vodafone Cash (فودافون كاش)</span>
-                        <span className="text-xs text-muted-foreground mt-1">Transfer to: 01012345678</span>
+                        <span>{t("checkout.vodafoneCash")}</span>
+                        <span className="text-xs text-muted-foreground mt-1">{t("checkout.vodafoneCashDesc")}</span>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-3 border border-border p-4 rounded-md">
+                      <RadioGroupItem value="bank" id="bank" />
+                      <Label htmlFor="bank" className="font-medium cursor-pointer flex flex-col">
+                        <span>{t("checkout.bankTransfer")}</span>
+                        <span className="text-xs text-muted-foreground mt-1">{t("checkout.bankTransferDesc")}</span>
                       </Label>
                     </div>
                     <div className="flex items-center space-x-3 border border-border p-4 rounded-md">
@@ -388,10 +395,10 @@ export default function Checkout() {
                     </div>
                   </RadioGroup>
 
-                  {(formData.paymentMethod === "instapay" || formData.paymentMethod === "vodafone_cash") && (
+                  {(formData.paymentMethod === "instapay" || formData.paymentMethod === "vodafone_cash" || formData.paymentMethod === "bank") && (
                     <div className="space-y-2 mt-4 p-4 bg-secondary/10 rounded-md border border-secondary/20">
                       <Label htmlFor="transferPhone" className="text-secondary-foreground font-semibold">
-                        {t("checkout.transferPhone") || "Phone Number you transferred from"} *
+                        {formData.paymentMethod === "bank" ? (t("checkout.transferName") || "Account Name transferred from") : t("checkout.transferPhone")} *
                       </Label>
                       <Input 
                         id="transferPhone" 
@@ -399,10 +406,10 @@ export default function Checkout() {
                         value={formData.transferPhone}
                         onChange={e => setFormData({...formData, transferPhone: e.target.value})}
                         className="bg-white border-secondary/30 focus-visible:ring-secondary" 
-                        placeholder="01xxxxxxxxx"
+                        placeholder={formData.paymentMethod === "bank" ? "Full Name" : "01xxxxxxxxx"}
                       />
                       <p className="text-xs text-muted-foreground mt-1">
-                        We need this to verify your payment.
+                        {t("checkout.paymentVerifyMsg") || "We need this to verify your payment."}
                       </p>
                     </div>
                   )}
