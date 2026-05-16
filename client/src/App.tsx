@@ -57,7 +57,30 @@ function Router() {
   );
 }
 
+import { useEffect } from "react";
+import { api } from "@shared/routes";
+
 function App() {
+  useEffect(() => {
+    const trackVisit = async () => {
+      const sessionId = sessionStorage.getItem("site_session_id");
+      if (!sessionId) {
+        const newSessionId = Math.random().toString(36).substring(2, 15);
+        sessionStorage.setItem("site_session_id", newSessionId);
+        try {
+          await fetch(api.analytics.visit.path, {
+            method: api.analytics.visit.method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId: newSessionId })
+          });
+        } catch (e) {
+          console.error("Failed to log visit", e);
+        }
+      }
+    };
+    trackVisit();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>

@@ -17,6 +17,8 @@ export const products = pgTable("products", {
   additionalImages: text("additional_images"), // JSON array of strings
   sizes: text("sizes"), // JSON array of strings or comma-separated
   colors: text("colors"), // JSON array of strings or comma-separated
+  views: integer("views").default(0),
+  timeSpent: integer("time_spent").default(0), // in seconds
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -97,3 +99,13 @@ export const sessions = pgTable("session", {
   sess: text("sess").notNull(),
   expire: timestamp("expire").notNull(),
 });
+
+export const siteVisits = pgTable("site_visits", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSiteVisitSchema = createInsertSchema(siteVisits).omit({ id: true, createdAt: true });
+export type SiteVisit = typeof siteVisits.$inferSelect;
+export type InsertSiteVisit = z.infer<typeof insertSiteVisitSchema>;

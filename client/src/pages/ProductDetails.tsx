@@ -44,6 +44,25 @@ export default function ProductDetails() {
     }
   }, [product]);
 
+  useEffect(() => {
+    if (!product) return;
+    
+    const startTime = Date.now();
+    
+    return () => {
+      const timeSpentSeconds = Math.floor((Date.now() - startTime) / 1000);
+      if (timeSpentSeconds > 2) { // only log if they stayed for more than 2 seconds
+        import("@shared/routes").then(({ api }) => {
+          fetch(api.analytics.productView.path, {
+            method: api.analytics.productView.method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productId: product.id, timeSpentSeconds })
+          }).catch(e => console.error("Failed to log product view", e));
+        });
+      }
+    };
+  }, [product?.id]);
+
   const handleAddToCart = (): boolean => {
     if (product) {
       if (product.sizes && !selectedSize) {

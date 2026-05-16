@@ -1,6 +1,6 @@
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import { useAdminStats, useClearAllData } from "@/hooks/use-admin";
-import { DollarSign, Package, ShoppingCart, Loader2, TrendingUp, Trash2 } from "lucide-react";
+import { DollarSign, Package, ShoppingCart, Loader2, TrendingUp, Trash2, Users, Eye, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -58,6 +58,12 @@ export default function AdminDashboard() {
       icon: Package,
       value: stats?.totalProducts || 0,
       color: "text-secondary"
+    },
+    {
+      title: t("admin.dashboard.totalVisits") || "Total Visits",
+      icon: Users,
+      value: stats?.totalVisits || 0,
+      color: "text-primary"
     }
   ];
 
@@ -134,6 +140,71 @@ export default function AdminDashboard() {
               );
             })}
           </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
+              <Card className="border-secondary/20 shadow-xl bg-gradient-to-br from-card to-card/80">
+                <CardHeader>
+                  <CardTitle className="text-lg font-serif text-primary flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-secondary" />
+                    {t("admin.dashboard.bestSellers") || "Best Selling Products"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {stats?.bestSellingProducts?.length > 0 ? stats.bestSellingProducts.map((p: any) => (
+                      <div key={p.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-3">
+                          <img src={p.imageUrl} alt={p.name} className="w-10 h-10 rounded object-cover" />
+                          <div>
+                            <p className="font-medium text-sm">{p.name}</p>
+                            <p className="text-xs text-muted-foreground">{p.totalSold} sold</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-primary">{p.totalRevenue.toFixed(2)} {t("product.currency")}</p>
+                        </div>
+                      </div>
+                    )) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">No sales data yet</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.5 }}>
+              <Card className="border-secondary/20 shadow-xl bg-gradient-to-br from-card to-card/80">
+                <CardHeader>
+                  <CardTitle className="text-lg font-serif text-primary flex items-center gap-2">
+                    <Eye className="w-5 h-5 text-secondary" />
+                    {t("admin.dashboard.mostViewed") || "Most Viewed Products"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {stats?.mostViewedProducts?.length > 0 ? stats.mostViewedProducts.map((p: any) => (
+                      <div key={p.id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border/50">
+                        <div className="flex items-center gap-3">
+                          <img src={p.imageUrl} alt={p.name} className="w-10 h-10 rounded object-cover" />
+                          <div>
+                            <p className="font-medium text-sm">{p.name}</p>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                              <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {p.views || 0}</span>
+                              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {Math.round((p.timeSpent || 0) / 60)} min</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">No view data yet</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+          
         ) : (
           <div className="text-center text-muted-foreground py-10">{t("admin.dashboard.failedStats")}</div>
         )}

@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { products, orders, orderItems, adminUsers, categories, leads, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { products, orders, orderItems, adminUsers, categories, leads, siteVisits, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead } from "@shared/schema";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   getProducts(): Promise<Product[]>;
@@ -12,7 +12,14 @@ export interface IStorage {
   createOrder(order: InsertOrder, items: {productId: number, quantity: number, price: string | number, size?: string | null, color?: string | null}[]): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
   deleteOrder(id: number): Promise<boolean>;
-  getAdminStats(): Promise<{totalOrders: number, totalRevenue: number, totalProducts: number}>;
+  getAdminStats(): Promise<{
+    totalOrders: number;
+    totalRevenue: number;
+    totalProducts: number;
+    totalVisits: number;
+    mostViewedProducts: Product[];
+    bestSellingProducts: (Product & { totalSold: number; totalRevenue: number })[];
+  }>;
   getAdminByUsername(username: string): Promise<AdminUser | undefined>;
   createAdmin(username: string, hashedPassword: string): Promise<AdminUser>;
   getCategories(): Promise<Category[]>;
@@ -24,6 +31,8 @@ export interface IStorage {
   createLead(lead: InsertLead): Promise<Lead>;
   deleteAllOrders(): Promise<void>;
   deleteAllLeads(): Promise<void>;
+  logSiteVisit(sessionId: string): Promise<void>;
+  logProductView(productId: number, timeSpentSeconds: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -93,13 +102,43 @@ export class DatabaseStorage implements IStorage {
     return !!deleted;
   }
 
-  async getAdminStats(): Promise<{totalOrders: number, totalRevenue: number, totalProducts: number}> {
+  async getAdminStats() {
     const allOrders = await db.select().from(orders);
     const allProducts = await db.select().from(products);
+    const allVisits = await db.select().from(siteVisits);
+    const allOrderItems = await db.select().from(orderItems);
+
+    // Calculate best-selling products
+    const productSales = new Map<number, { totalSold: number; totalRevenue: number }>();
+    allOrderItems.forEach((item) => {
+      const current = productSales.get(item.productId) || { totalSold: 0, totalRevenue: 0 };
+      productSales.set(item.productId, {
+        totalSold: current.totalSold + item.quantity,
+        totalRevenue: current.totalRevenue + (Number(item.price) * item.quantity),
+      });
+    });
+
+    const bestSellingProducts = allProducts
+      .map((p) => ({
+        ...p,
+        totalSold: productSales.get(p.id)?.totalSold || 0,
+        totalRevenue: productSales.get(p.id)?.totalRevenue || 0,
+      }))
+      .filter((p) => p.totalSold > 0)
+      .sort((a, b) => b.totalSold - a.totalSold)
+      .slice(0, 5);
+
+    const mostViewedProducts = [...allProducts]
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 5);
+
     return {
       totalOrders: allOrders.length,
       totalRevenue: allOrders.reduce((sum, o) => sum + Number(o.totalAmount), 0),
       totalProducts: allProducts.length,
+      totalVisits: allVisits.length,
+      mostViewedProducts,
+      bestSellingProducts,
     };
   }
 
@@ -153,6 +192,19 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAllLeads(): Promise<void> {
     await db.delete(leads);
+  }
+
+  async logSiteVisit(sessionId: string): Promise<void> {
+    await db.insert(siteVisits).values({ sessionId });
+  }
+
+  async logProductView(productId: number, timeSpentSeconds: number): Promise<void> {
+    await db.update(products)
+      .set({
+        views: sql`${products.views} + 1`,
+        timeSpent: sql`${products.timeSpent} + ${timeSpentSeconds}`,
+      })
+      .where(eq(products.id, productId));
   }
 }
 

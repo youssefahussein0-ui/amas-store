@@ -153,6 +153,9 @@
       "totalRevenue": "Total Revenue",
       "totalOrders": "Total Orders",
       "totalProducts": "Total Products",
+      "totalVisits": "Total Visits",
+      "bestSellers": "Best Selling Products",
+      "mostViewed": "Most Viewed Products",
       "realtime": "Updated in real-time",
       "failedStats": "Failed to load statistics"
     },

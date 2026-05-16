@@ -304,6 +304,29 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.status(204).end();
   });
 
+  // Analytics
+  app.post(api.analytics.visit.path, async (req, res) => {
+    try {
+      const input = api.analytics.visit.input.parse(req.body);
+      await storage.logSiteVisit(input.sessionId);
+      res.status(204).end();
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
+  app.post(api.analytics.productView.path, async (req, res) => {
+    try {
+      const input = api.analytics.productView.input.parse(req.body);
+      await storage.logProductView(input.productId, input.timeSpentSeconds);
+      res.status(204).end();
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
   app.post(api.leads.create.path, async (req, res) => {
     try {
       const input = api.leads.create.input.parse(req.body);

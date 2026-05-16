@@ -177,6 +177,9 @@ export const api = {
           totalOrders: z.number(),
           totalRevenue: z.number(),
           totalProducts: z.number(),
+          totalVisits: z.number().optional().default(0),
+          mostViewedProducts: z.array(z.any()).optional().default([]),
+          bestSellingProducts: z.array(z.any()).optional().default([]),
         }),
       },
     },
@@ -233,6 +236,29 @@ export const api = {
       responses: {
         201: z.any(),
         400: errorSchemas.validation,
+      },
+    },
+  },
+  analytics: {
+    visit: {
+      method: 'POST' as const,
+      path: '/api/analytics/visit' as const,
+      input: z.object({
+        sessionId: z.string(),
+      }),
+      responses: {
+        204: z.void(),
+      },
+    },
+    productView: {
+      method: 'POST' as const,
+      path: '/api/analytics/product-view' as const,
+      input: z.object({
+        productId: z.number(),
+        timeSpentSeconds: z.number(),
+      }),
+      responses: {
+        204: z.void(),
       },
     },
   }
