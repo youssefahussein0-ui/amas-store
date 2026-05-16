@@ -14,6 +14,7 @@ import { convertGoogleDriveLink, cn, trackEvent } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { api } from "@shared/routes";
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1000&auto=format&fit=crop";
 
@@ -35,6 +36,17 @@ export default function ProductDetails() {
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const { t } = useLanguage();
 
+  useEffect(() => {
+    if (product) {
+      setActiveImage(product.imageUrl);
+      if (product.sizes) {
+        const sizes = product.sizes.split(",").map(s => s.trim());
+        if (sizes.length > 0) setSelectedSize(sizes[0]);
+      }
+      if (product.colors) {
+        const colors = product.colors.split(",").map(s => s.trim());
+        if (colors.length > 0) setSelectedColor(colors[0]);
+      }
     }
   }, [product]);
 
