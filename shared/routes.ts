@@ -344,7 +344,25 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
-  }
+  },
+  analytics: {
+    visit: {
+      method: 'POST' as const,
+      path: '/api/analytics/visit' as const,
+      input: z.object({ sessionId: z.string() }),
+      responses: {
+        204: z.void(),
+      },
+    },
+    productView: {
+      method: 'POST' as const,
+      path: '/api/analytics/product-view' as const,
+      input: z.object({ productId: z.number(), timeSpentSeconds: z.number() }),
+      responses: {
+        204: z.void(),
+      },
+    },
+  },
 };
 
 export function buildUrl(path: string, params?: Record<string, string | number>): string {
