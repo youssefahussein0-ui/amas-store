@@ -239,26 +239,72 @@ export const api = {
       },
     },
   },
-  analytics: {
-    visit: {
-      method: 'POST' as const,
-      path: '/api/analytics/visit' as const,
-      input: z.object({
-        sessionId: z.string(),
-      }),
+    },
+  },
+  promoCodes: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/promo-codes' as const,
       responses: {
-        204: z.void(),
+        200: z.array(z.any()),
       },
     },
-    productView: {
+    validate: {
       method: 'POST' as const,
-      path: '/api/analytics/product-view' as const,
-      input: z.object({
-        productId: z.number(),
-        timeSpentSeconds: z.number(),
-      }),
+      path: '/api/promo-codes/validate' as const,
+      input: z.object({ code: z.string() }),
+      responses: {
+        200: z.any(),
+        400: errorSchemas.validation,
+        404: errorSchemas.notFound,
+      },
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/promo-codes' as const,
+      input: z.any(),
+      responses: {
+        201: z.any(),
+        400: errorSchemas.validation,
+      },
+    },
+    update: {
+      method: 'PATCH' as const,
+      path: '/api/promo-codes/:id' as const,
+      input: z.any(),
+      responses: {
+        200: z.any(),
+        404: errorSchemas.notFound,
+      },
+    },
+    delete: {
+      method: 'DELETE' as const,
+      path: '/api/promo-codes/:id' as const,
       responses: {
         204: z.void(),
+        404: errorSchemas.notFound,
+      },
+    },
+  },
+  abandonedCarts: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/admin/abandoned-carts' as const,
+      responses: {
+        200: z.array(z.any()),
+      },
+    },
+    sync: {
+      method: 'POST' as const,
+      path: '/api/abandoned-carts/sync' as const,
+      input: z.object({
+        sessionId: z.string(),
+        cartData: z.string(),
+        customerPhone: z.string().optional(),
+        customerEmail: z.string().optional(),
+      }),
+      responses: {
+        200: z.any(),
       },
     },
   }

@@ -51,10 +51,14 @@ export default function Checkout() {
     paymentMethod: "cod",
     transferPhone: ""
   });
+  const [promoCode, setPromoCode] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState<any>(null);
 
   const selectedRegion = REGIONS.find(r => r.id === formData.region);
   const shippingFee = selectedRegion ? selectedRegion.price : 0;
-  const finalTotal = getDiscountedTotal() + shippingFee;
+  // Use the updated total calculation
+  // finalTotal is now defined by finalTotalWithPromo below
 
   useEffect(() => {
     if (items.length > 0) {
@@ -138,7 +142,9 @@ export default function Checkout() {
       specialInstructions: formData.specialInstructions || null,
       paymentMethod: formData.paymentMethod,
       transferPhone: formData.transferPhone || null,
-      totalAmount: finalTotal.toString(),
+      promoCode: appliedPromo?.code || null,
+      discountAmount: calculateDiscount().toString(),
+      totalAmount: finalTotalWithPromo.toString(),
       items: items.map(item => ({
         productId: item.product.id,
         quantity: item.quantity,
@@ -168,6 +174,38 @@ export default function Checkout() {
       }
     });
   };
+
+  const handleApplyPromo = async () => {
+    if (!promoCode) return;
+    setPromoLoading(true);
+    try {
+      const res = await fetch(api.promoCodes.validate.path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+      setAppliedPromo(data);
+      toast({ title: "Success", description: "Promo code applied successfully!" });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const calculateDiscount = () => {
+    if (!appliedPromo) return 0;
+    const subtotal = getCartTotal();
+    if (appliedPromo.discountType === "percentage") {
+      return (subtotal * Number(appliedPromo.discountValue)) / 100;
+    }
+    return Number(appliedPromo.discountValue);
+  };
+
+  const discountedTotal = getCartTotal() - calculateDiscount();
+  const finalTotalWithPromo = discountedTotal + shippingFee;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -411,15 +449,36 @@ export default function Checkout() {
                   <span>{t("checkout.shipping")} ({formData.region ? t(`regions.${formData.region}`) : t("checkout.selectRegion")})</span>
                   <span>{shippingFee > 0 ? `${shippingFee.toFixed(2)} ${t("product.currency")}` : t("checkout.selectRegion")}</span>
                 </div>
-                {appliedDiscount && (
+                {appliedPromo && (
                   <div className="flex justify-between text-green-600 font-medium">
-                    <span>Discount ({appliedDiscount}%)</span>
-                    <span>-{(getCartTotal() * appliedDiscount / 100).toFixed(2)} {t("product.currency")}</span>
+                    <span>{t("checkout.discount") || "Discount"} ({appliedPromo.code})</span>
+                    <span>-{calculateDiscount().toFixed(2)} {t("product.currency")}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-xl font-serif text-primary pt-4">
                   <span>{t("checkout.total")}</span>
-                  <span>{finalTotal.toFixed(2)} {t("product.currency")}</span>
+                  <span>{finalTotalWithPromo.toFixed(2)} {t("product.currency")}</span>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-border">
+                <Label htmlFor="promo">{t("checkout.promoCode") || "Promo Code"}</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input 
+                    id="promo" 
+                    value={promoCode} 
+                    onChange={e => setPromoCode(e.target.value)} 
+                    placeholder={t("checkout.promoPlaceholder") || "Enter code"}
+                    className="bg-background"
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={handleApplyPromo} 
+                    disabled={promoLoading || !promoCode}
+                    variant="outline"
+                  >
+                    {promoLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t("checkout.apply") || "Apply"}
+                  </Button>
                 </div>
               </div>
             </div>

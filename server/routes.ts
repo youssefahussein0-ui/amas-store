@@ -304,6 +304,61 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.status(204).end();
   });
 
+  // Promo Codes
+  app.get(api.promoCodes.list.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    res.json(await storage.getPromoCodes());
+  });
+
+  app.post(api.promoCodes.validate.path, async (req, res) => {
+    try {
+      const { code } = api.promoCodes.validate.input.parse(req.body);
+      const promo = await storage.getPromoCodeByCode(code);
+      if (!promo) return res.status(404).json({ message: "Invalid promo code" });
+      if (!promo.isActive) return res.status(400).json({ message: "Promo code is inactive" });
+      if (promo.expiresAt && new Date(promo.expiresAt) < new Date()) return res.status(400).json({ message: "Promo code has expired" });
+      if (promo.maxUses && promo.currentUses && promo.currentUses >= promo.maxUses) return res.status(400).json({ message: "Promo code usage limit reached" });
+      res.json(promo);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      throw err;
+    }
+  });
+
+  app.post(api.promoCodes.create.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    const promo = await storage.createPromoCode(req.body);
+    res.status(201).json(promo);
+  });
+
+  app.patch(api.promoCodes.update.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    const id = Number(req.params.id);
+    const promo = await storage.updatePromoCode(id, req.body);
+    if (!promo) return res.status(404).json({ message: "Promo code not found" });
+    res.json(promo);
+  });
+
+  app.delete(api.promoCodes.delete.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    const id = Number(req.params.id);
+    const success = await storage.deletePromoCode(id);
+    if (!success) return res.status(404).json({ message: "Promo code not found" });
+    res.status(204).end();
+  });
+
+  // Abandoned Carts
+  app.get(api.abandonedCarts.list.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    res.json(await storage.getAbandonedCarts());
+  });
+
+  app.post(api.abandonedCarts.sync.path, async (req, res) => {
+    const { sessionId, cartData, customerPhone, customerEmail } = api.abandonedCarts.sync.input.parse(req.body);
+    const cart = await storage.upsertAbandonedCart(sessionId, cartData, customerPhone, customerEmail);
+    res.json(cart);
+  });
+
   // Analytics
   app.post(api.analytics.visit.path, async (req, res) => {
     try {

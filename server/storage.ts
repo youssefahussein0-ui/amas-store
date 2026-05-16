@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { products, orders, orderItems, adminUsers, categories, leads, siteVisits, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead } from "@shared/schema";
+import { products, orders, orderItems, adminUsers, categories, leads, siteVisits, promoCodes, abandonedCarts, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead, type PromoCode, type InsertPromoCode, type AbandonedCart, type InsertAbandonedCart } from "@shared/schema";
 import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
@@ -33,6 +33,17 @@ export interface IStorage {
   deleteAllLeads(): Promise<void>;
   logSiteVisit(sessionId: string): Promise<void>;
   logProductView(productId: number, timeSpentSeconds: number): Promise<void>;
+
+  getPromoCodes(): Promise<PromoCode[]>;
+  getPromoCodeByCode(code: string): Promise<PromoCode | undefined>;
+  createPromoCode(promo: InsertPromoCode): Promise<PromoCode>;
+  updatePromoCode(id: number, promo: Partial<InsertPromoCode>): Promise<PromoCode | undefined>;
+  deletePromoCode(id: number): Promise<boolean>;
+  incrementPromoCodeUsage(id: number): Promise<void>;
+
+  getAbandonedCarts(): Promise<AbandonedCart[]>;
+  upsertAbandonedCart(sessionId: string, cartData: string, customerPhone?: string, customerEmail?: string): Promise<AbandonedCart>;
+  markCartRecovered(sessionId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -205,6 +216,68 @@ export class DatabaseStorage implements IStorage {
         timeSpent: sql`${products.timeSpent} + ${timeSpentSeconds}`,
       })
       .where(eq(products.id, productId));
+  }
+
+  // Phase 2: Promo Codes
+  async getPromoCodes(): Promise<PromoCode[]> {
+    return await db.select().from(promoCodes).orderBy(desc(promoCodes.createdAt));
+  }
+
+  async getPromoCodeByCode(code: string): Promise<PromoCode | undefined> {
+    const [promo] = await db.select().from(promoCodes).where(eq(promoCodes.code, code));
+    return promo;
+  }
+
+  async createPromoCode(insertPromo: InsertPromoCode): Promise<PromoCode> {
+    const [promo] = await db.insert(promoCodes).values(insertPromo).returning();
+    return promo;
+  }
+
+  async updatePromoCode(id: number, updates: Partial<InsertPromoCode>): Promise<PromoCode | undefined> {
+    const [promo] = await db.update(promoCodes).set(updates).where(eq(promoCodes.id, id)).returning();
+    return promo;
+  }
+
+  async deletePromoCode(id: number): Promise<boolean> {
+    const [deleted] = await db.delete(promoCodes).where(eq(promoCodes.id, id)).returning();
+    return !!deleted;
+  }
+
+  async incrementPromoCodeUsage(id: number): Promise<void> {
+    await db.update(promoCodes)
+      .set({ currentUses: sql`${promoCodes.currentUses} + 1` })
+      .where(eq(promoCodes.id, id));
+  }
+
+  // Phase 2: Abandoned Carts
+  async getAbandonedCarts(): Promise<AbandonedCart[]> {
+    return await db.select().from(abandonedCarts).orderBy(desc(abandonedCarts.lastActive));
+  }
+
+  async upsertAbandonedCart(sessionId: string, cartData: string, customerPhone?: string, customerEmail?: string): Promise<AbandonedCart> {
+    const [existing] = await db.select().from(abandonedCarts).where(eq(abandonedCarts.sessionId, sessionId));
+    if (existing) {
+      const [updated] = await db.update(abandonedCarts).set({
+        cartData,
+        customerPhone: customerPhone || existing.customerPhone,
+        customerEmail: customerEmail || existing.customerEmail,
+        lastActive: new Date()
+      }).where(eq(abandonedCarts.sessionId, sessionId)).returning();
+      return updated;
+    } else {
+      const [inserted] = await db.insert(abandonedCarts).values({
+        sessionId,
+        cartData,
+        customerPhone,
+        customerEmail,
+        lastActive: new Date()
+      }).returning();
+      return inserted;
+    }
+  }
+
+  async markCartRecovered(sessionId: string): Promise<void> {
+    await db.update(abandonedCarts).set({ recovered: true }).where(eq(abandonedCarts.sessionId, sessionId));
   }
 }
 

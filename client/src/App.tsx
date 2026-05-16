@@ -20,6 +20,8 @@ import Products from "./pages/admin/Products";
 import Categories from "./pages/admin/Categories";
 import Orders from "./pages/admin/Orders";
 import Leads from "./pages/admin/Leads";
+import PromoCodes from "./pages/admin/PromoCodes";
+import AbandonedCarts from "./pages/admin/AbandonedCarts";
 import { ProtectedAdminRoute } from "@/components/layout/ProtectedAdminRoute";
 import { ErrorBoundary } from "@/components/layout/ErrorBoundary";
 
@@ -50,6 +52,12 @@ function Router() {
       <Route path="/admin/leads">
         {() => <ProtectedAdminRoute><Leads /></ProtectedAdminRoute>}
       </Route>
+      <Route path="/admin/promo-codes">
+        {() => <ProtectedAdminRoute><PromoCodes /></ProtectedAdminRoute>}
+      </Route>
+      <Route path="/admin/abandoned-carts">
+        {() => <ProtectedAdminRoute><AbandonedCarts /></ProtectedAdminRoute>}
+      </Route>
 
       {/* Fallback to 404 */}
       <Route component={NotFound} />
@@ -59,6 +67,7 @@ function Router() {
 
 import { useEffect } from "react";
 import { api } from "@shared/routes";
+import { useCart } from "@/hooks/use-cart";
 
 function App() {
   useEffect(() => {
@@ -80,6 +89,32 @@ function App() {
     };
     trackVisit();
   }, []);
+
+  const { items } = useCart();
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    const syncCart = async () => {
+      const sessionId = sessionStorage.getItem("site_session_id");
+      if (!sessionId) return;
+
+      try {
+        await fetch(api.abandonedCarts.sync.path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            cartData: JSON.stringify(items)
+          })
+        });
+      } catch (e) {
+        console.error("Failed to sync cart", e);
+      }
+    };
+
+    const timer = setTimeout(syncCart, 2000); // Sync after 2s of inactivity
+    return () => clearTimeout(timer);
+  }, [items]);
 
   return (
     <QueryClientProvider client={queryClient}>

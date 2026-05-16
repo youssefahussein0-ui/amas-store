@@ -149,10 +149,12 @@
       "invalidCredentials": "بيانات الدخول غير صحيحة"
     },
     "sidebar": {
-      "dashboard": "لوحة المعلومات",
-      "categories": "الفئات",
+      "dashboard": "لوحة التحكم",
+      "categories": "الأقسام",
       "products": "المنتجات",
       "orders": "الطلبات",
+      "promo": "أكواد الخصم",
+      "abandoned": "السلات المتروكة",
       "logout": "تسجيل الخروج"
     },
     "dashboard": {

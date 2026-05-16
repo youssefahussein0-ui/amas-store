@@ -43,6 +43,8 @@ export const orders = pgTable("orders", {
   paymentMethod: text("payment_method").notNull(), // cash_on_delivery, instapay, vodafone_cash, card
   transferPhone: text("transfer_phone"),
   paymentReceiptUrl: text("payment_receipt_url"),
+  promoCode: text("promo_code"),
+  discountAmount: numeric("discount_amount"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -117,3 +119,35 @@ export const siteVisits = pgTable("site_visits", {
 export const insertSiteVisitSchema = createInsertSchema(siteVisits).omit({ id: true, createdAt: true });
 export type SiteVisit = typeof siteVisits.$inferSelect;
 export type InsertSiteVisit = z.infer<typeof insertSiteVisitSchema>;
+
+// Phase 2: Promo Codes and Abandoned Carts
+export const promoCodes = pgTable("promo_codes", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  discountType: text("discount_type").notNull().default("percentage"), // percentage or fixed
+  discountValue: numeric("discount_value").notNull(),
+  maxUses: integer("max_uses"), // null means unlimited
+  currentUses: integer("current_uses").default(0),
+  isActive: boolean("is_active").default(true),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({ id: true, createdAt: true, currentUses: true });
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type InsertPromoCode = z.infer<typeof insertPromoCodeSchema>;
+
+export const abandonedCarts = pgTable("abandoned_carts", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull().unique(),
+  cartData: text("cart_data").notNull(), // JSON string of cart items
+  customerPhone: text("customer_phone"),
+  customerEmail: text("customer_email"),
+  lastActive: timestamp("last_active").defaultNow(),
+  recovered: boolean("recovered").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAbandonedCartSchema = createInsertSchema(abandonedCarts).omit({ id: true, createdAt: true, recovered: true });
+export type AbandonedCart = typeof abandonedCarts.$inferSelect;
+export type InsertAbandonedCart = z.infer<typeof insertAbandonedCartSchema>;

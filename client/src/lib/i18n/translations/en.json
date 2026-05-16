@@ -153,6 +153,8 @@
       "categories": "Categories",
       "products": "Products",
       "orders": "Orders",
+      "promo": "Promo Codes",
+      "abandoned": "Abandoned Carts",
       "logout": "Logout"
     },
     "dashboard": {
