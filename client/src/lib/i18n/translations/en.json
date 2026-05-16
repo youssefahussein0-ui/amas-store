@@ -176,6 +176,8 @@
       "totalVisits": "Total Visits",
       "bestSellers": "Best Selling Products",
       "mostViewed": "Most Viewed Products",
+      "revenueTrend": "Revenue Trend (Last 7 Days)",
+      "ordersTrend": "Orders Trend (Last 7 Days)",
       "realtime": "Updated in real-time",
       "failedStats": "Failed to load statistics"
     },

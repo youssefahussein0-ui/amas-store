@@ -17,6 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip } from "recharts";
 
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useAdminStats();
@@ -140,6 +141,79 @@ export default function AdminDashboard() {
                   </motion.div>
                 );
               })}
+            </div>
+            
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
+                <Card className="border-secondary/20 shadow-xl bg-gradient-to-br from-card to-card/80 p-6">
+                  <CardTitle className="text-lg font-serif text-primary mb-6 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-secondary" />
+                    {t("admin.dashboard.revenueTrend") || "Revenue Trend (Last 7 Days)"}
+                  </CardTitle>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={stats.dailyStats}>
+                        <defs>
+                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground)/0.1)" />
+                        <XAxis 
+                          dataKey="date" 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 10}}
+                          tickFormatter={(str) => new Date(str).toLocaleDateString(undefined, {weekday: 'short'})}
+                        />
+                        <YAxis axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 10}} />
+                        <ChartTooltip 
+                          contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px'}}
+                          itemStyle={{color: 'hsl(var(--primary))'}}
+                        />
+                        <Area type="monotone" dataKey="revenue" stroke="hsl(var(--secondary))" fillOpacity={1} fill="url(#colorRevenue)" strokeWidth={3} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
+              </motion.div>
+
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
+                <Card className="border-secondary/20 shadow-xl bg-gradient-to-br from-card to-card/80 p-6">
+                  <CardTitle className="text-lg font-serif text-primary mb-6 flex items-center gap-2">
+                    <ShoppingCart className="w-5 h-5 text-primary" />
+                    {t("admin.dashboard.ordersTrend") || "Orders Trend (Last 7 Days)"}
+                  </CardTitle>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={stats.dailyStats}>
+                        <defs>
+                          <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground)/0.1)" />
+                        <XAxis 
+                          dataKey="date" 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 10}}
+                          tickFormatter={(str) => new Date(str).toLocaleDateString(undefined, {weekday: 'short'})}
+                        />
+                        <YAxis axisLine={false} tickLine={false} tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 10}} />
+                        <ChartTooltip 
+                          contentStyle={{backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px'}}
+                          itemStyle={{color: 'hsl(var(--primary))'}}
+                        />
+                        <Area type="monotone" dataKey="orders" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorOrders)" strokeWidth={3} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </Card>
+              </motion.div>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">

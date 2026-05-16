@@ -148,6 +148,23 @@ export class DatabaseStorage implements IStorage {
       .sort((a, b) => (b.views || 0) - (a.views || 0))
       .slice(0, 5);
 
+    // Calculate daily stats for the last 7 days
+    const dailyStats = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const dayOrders = allOrders.filter(o => o.createdAt?.toISOString().split('T')[0] === dateStr);
+      const dayRevenue = dayOrders.reduce((sum, order) => sum + Number(order.totalAmount), 0);
+      
+      dailyStats.push({
+        date: dateStr,
+        orders: dayOrders.length,
+        revenue: dayRevenue
+      });
+    }
+
     return {
       totalOrders: allOrders.length,
       totalRevenue: allOrders.reduce((sum, o) => sum + Number(o.totalAmount), 0),
@@ -155,6 +172,7 @@ export class DatabaseStorage implements IStorage {
       totalVisits: allVisits.length,
       mostViewedProducts,
       bestSellingProducts,
+      dailyStats
     };
   }
 

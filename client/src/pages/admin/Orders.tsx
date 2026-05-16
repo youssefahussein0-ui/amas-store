@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { convertGoogleDriveLink } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { ExportButtons } from "@/components/admin/ExportButtons";
 
 export default function AdminOrders() {
   const { data: orders, isLoading } = useOrders();
@@ -36,12 +37,28 @@ export default function AdminOrders() {
     }
   };
 
+  const exportData = orders?.map(o => ({
+    ID: o.id,
+    Customer: o.customerName,
+    Phone: o.customerPhone,
+    Email: o.customerEmail || "-",
+    Address: o.customerAddress,
+    Amount: o.totalAmount,
+    Method: o.paymentMethod,
+    Status: o.status,
+    Date: new Date(o.createdAt).toLocaleString(),
+    Items: o.items?.map((i: any) => `${i.product?.name} (x${i.quantity})`).join(", ")
+  })) || [];
+
   return (
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
       
       <main className="flex-1 p-8">
-        <h1 className="text-3xl font-serif text-primary mb-8">{t("admin.orders.title")}</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-serif text-primary">{t("admin.orders.title")}</h1>
+          {!isLoading && orders && <ExportButtons data={exportData} filename="Amas-Orders" sheetName="Orders" />}
+        </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-border overflow-hidden">
           {isLoading ? (

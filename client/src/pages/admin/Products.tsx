@@ -13,6 +13,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@shared/routes";
 import { convertGoogleDriveLink, cn } from "@/lib/utils";
+import { ExportButtons } from "@/components/admin/ExportButtons";
 
 export default function AdminProducts() {
   const { data: products, isLoading } = useProducts();
@@ -32,6 +33,19 @@ export default function AdminProducts() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const exportData = products?.map(p => ({
+    ID: p.id,
+    Name: p.name,
+    Price: p.price,
+    Discount: p.discountPrice || "-",
+    Category: p.category,
+    Stock: p.stock,
+    New: p.isNew ? "Yes" : "No",
+    BestSeller: p.isBestSeller ? "Yes" : "No",
+    Views: p.views || 0,
+    Created: new Date(p.createdAt).toLocaleDateString()
+  })) || [];
 
   const [formData, setFormData] = useState({
     name: "", description: "", price: "", imageUrl: "", category: "Rings", stock: 10, isNew: true, isBestSeller: false, materials: "", discountPrice: "",
@@ -238,7 +252,10 @@ export default function AdminProducts() {
       
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-serif text-primary">{t("admin.products.title")}</h1>
+          <div className="flex items-center gap-6">
+            <h1 className="text-3xl font-serif text-primary">{t("admin.products.title")}</h1>
+            {!isLoading && products && <ExportButtons data={exportData} filename="Amas-Products" sheetName="Products" />}
+          </div>
           
           <div className="flex gap-3 items-center">
             <div className="relative">

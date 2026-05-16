@@ -180,6 +180,11 @@ export const api = {
           totalVisits: z.number().optional().default(0),
           mostViewedProducts: z.array(z.any()).optional().default([]),
           bestSellingProducts: z.array(z.any()).optional().default([]),
+          dailyStats: z.array(z.object({
+            date: z.string(),
+            orders: z.number(),
+            revenue: z.number(),
+          })).optional().default([]),
         }),
       },
     },
