@@ -116,7 +116,13 @@
     "returnHome": "Return Home",
     "selectRegion": "Select Region",
     "region": "Region / Governorate",
-    "fillAllFields": "Please fill in all required fields to complete your order."
+    "fillAllFields": "Please fill in all required fields to complete your order.",
+    "discount": "Discount",
+    "promoCode": "Promo Code",
+    "promoPlaceholder": "Enter code here",
+    "apply": "Apply",
+    "transferName": "Account Name transferred from",
+    "paymentVerifyMsg": "We need this to verify your payment."
   },
   "regions": {
     "cairo_giza": "Cairo & Giza",

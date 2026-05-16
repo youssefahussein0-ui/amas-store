@@ -60,12 +60,24 @@ export default function Checkout() {
   // Use the updated total calculation
   // finalTotal is now defined by finalTotalWithPromo below
 
+  const calculateDiscount = () => {
+    if (!appliedPromo) return 0;
+    const subtotal = getCartTotal();
+    if (appliedPromo.discountType === "percentage") {
+      return (subtotal * Number(appliedPromo.discountValue)) / 100;
+    }
+    return Number(appliedPromo.discountValue);
+  };
+
+  const discountedTotal = getCartTotal() - calculateDiscount();
+  const finalTotalWithPromo = discountedTotal + shippingFee;
+
   useEffect(() => {
     if (items.length > 0) {
       trackEvent("InitiateCheckout", {
         content_ids: items.map(item => item.product.id),
         content_type: 'product',
-        value: finalTotal,
+        value: finalTotalWithPromo,
         currency: 'EGP',
         num_items: items.length
       });
@@ -157,7 +169,7 @@ export default function Checkout() {
         trackEvent("Purchase", {
           content_ids: items.map(item => item.product.id),
           content_type: 'product',
-          value: finalTotal,
+          value: finalTotalWithPromo,
           currency: 'EGP',
           num_items: items.length,
           transaction_id: data.id
@@ -194,18 +206,6 @@ export default function Checkout() {
       setPromoLoading(false);
     }
   };
-
-  const calculateDiscount = () => {
-    if (!appliedPromo) return 0;
-    const subtotal = getCartTotal();
-    if (appliedPromo.discountType === "percentage") {
-      return (subtotal * Number(appliedPromo.discountValue)) / 100;
-    }
-    return Number(appliedPromo.discountValue);
-  };
-
-  const discountedTotal = getCartTotal() - calculateDiscount();
-  const finalTotalWithPromo = discountedTotal + shippingFee;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
