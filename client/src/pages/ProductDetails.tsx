@@ -87,9 +87,9 @@ export default function ProductDetails() {
 
   useEffect(() => {
     if (!product) return;
-    
+
     const startTime = Date.now();
-    
+
     return () => {
       const timeSpentSeconds = Math.floor((Date.now() - startTime) / 1000);
       if (timeSpentSeconds > 2) { // only log if they stayed for more than 2 seconds
@@ -123,7 +123,7 @@ export default function ProductDetails() {
         return false;
       }
       addItem(product, quantity, selectedSize, selectedColor);
-      
+
       trackEvent("AddToCart", {
         content_name: product.name,
         content_category: product.category,
@@ -187,19 +187,19 @@ export default function ProductDetails() {
       <main className="flex-1 pt-32 pb-24">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24 mb-24">
-            
+
             {/* Image Gallery */}
             <div className="space-y-4">
               <div className="aspect-[4/5] bg-muted/20 rounded-xl overflow-hidden shadow-xl relative group">
-                <img 
-                  src={convertGoogleDriveLink(activeImage)} 
-                  alt={product.name} 
+                <img
+                  src={convertGoogleDriveLink(activeImage)}
+                  alt={product.name}
                   onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; e.currentTarget.onerror = null; }}
-                  className={cn("w-full h-full object-cover transition-transform duration-500 hover:scale-105", isSoldOut && "grayscale opacity-70")} 
+                  className={cn("w-full h-full object-cover transition-transform duration-500 hover:scale-105", isSoldOut && "grayscale opacity-70")}
                 />
                 {allImages.length > 1 && (
                   <>
-                    <button 
+                    <button
                       onClick={() => {
                         const idx = allImages.indexOf(activeImage);
                         setActiveImage(allImages[(idx - 1 + allImages.length) % allImages.length]);
@@ -208,7 +208,7 @@ export default function ProductDetails() {
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
-                    <button 
+                    <button
                       onClick={() => {
                         const idx = allImages.indexOf(activeImage);
                         setActiveImage(allImages[(idx + 1) % allImages.length]);
@@ -223,8 +223,8 @@ export default function ProductDetails() {
               {allImages.length > 1 && (
                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
                   {allImages.map((img, i) => (
-                    <button 
-                      key={i} 
+                    <button
+                      key={i}
                       onClick={() => setActiveImage(img)}
                       className={cn(
                         "w-20 h-24 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0",
@@ -277,8 +277,8 @@ export default function ProductDetails() {
                         onClick={() => setSelectedSize(size)}
                         className={cn(
                           "min-w-[3rem] h-12 flex items-center justify-center border transition-all",
-                          selectedSize === size 
-                            ? "border-primary bg-primary text-white shadow-lg" 
+                          selectedSize === size
+                            ? "border-primary bg-primary text-white shadow-lg"
                             : "border-border hover:border-primary"
                         )}
                       >
@@ -300,8 +300,8 @@ export default function ProductDetails() {
                         onClick={() => setSelectedColor(color)}
                         className={cn(
                           "min-w-[4rem] h-12 flex items-center justify-center border transition-all px-4",
-                          selectedColor === color 
-                            ? "border-primary bg-primary text-white shadow-lg" 
+                          selectedColor === color
+                            ? "border-primary bg-primary text-white shadow-lg"
                             : "border-border hover:border-primary"
                         )}
                       >
@@ -314,21 +314,21 @@ export default function ProductDetails() {
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-8 border-y border-border py-6">
                 <div className="flex items-center justify-between sm:justify-start border border-input rounded-md flex-shrink-0">
-                  <button 
+                  <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     disabled={isSoldOut}
                     className="px-4 py-3 text-xl hover:text-primary transition-colors disabled:opacity-50"
                   >-</button>
                   <span className="w-12 text-center font-medium">{quantity}</span>
-                  <button 
+                  <button
                     onClick={() => setQuantity(quantity + 1)}
                     disabled={isSoldOut}
                     className="px-4 py-3 text-xl hover:text-primary transition-colors disabled:opacity-50"
                   >+</button>
                 </div>
-                
+
                 <div className="flex flex-1 gap-3">
-                  <Button 
+                  <Button
                     onClick={handleAddToCart}
                     disabled={isSoldOut}
                     className={cn("flex-1 h-14 rounded-md font-medium tracking-wide uppercase shadow-lg", isSoldOut ? "bg-muted text-muted-foreground" : "bg-secondary hover:bg-secondary/90 text-secondary-foreground")}
@@ -336,9 +336,9 @@ export default function ProductDetails() {
                     <ShoppingCart className="w-4 h-4 me-2" />
                     {isSoldOut ? t("product.soldOut") : t("product.addToCart")}
                   </Button>
-                  
+
                   {!isSoldOut && (
-                    <Button 
+                    <Button
                       onClick={handleBuyNow}
                       className="flex-1 bg-primary hover:bg-primary/90 text-white h-14 rounded-md font-medium tracking-wide uppercase shadow-lg shadow-primary/20"
                     >
@@ -395,10 +395,10 @@ export default function ProductDetails() {
                   <form onSubmit={handleSubmitReview} className="space-y-4">
                     <div className="space-y-2">
                       <Label className="text-xs uppercase tracking-wider">{t("common.name")}</Label>
-                      <Input 
-                        required 
-                        value={newReview.customerName} 
-                        onChange={e => setNewReview({...newReview, customerName: e.target.value})}
+                      <Input
+                        required
+                        value={newReview.customerName}
+                        onChange={e => setNewReview({ ...newReview, customerName: e.target.value })}
                         className="bg-background"
                       />
                     </div>
@@ -406,10 +406,10 @@ export default function ProductDetails() {
                       <Label className="text-xs uppercase tracking-wider">{t("product.rating") || "Rating"}</Label>
                       <div className="flex gap-2">
                         {[1, 2, 3, 4, 5].map(star => (
-                          <button 
-                            key={star} 
+                          <button
+                            key={star}
                             type="button"
-                            onClick={() => setNewReview({...newReview, rating: star})}
+                            onClick={() => setNewReview({ ...newReview, rating: star })}
                             className="transition-transform hover:scale-110"
                           >
                             <Star className={cn("w-6 h-6", star <= newReview.rating ? "fill-secondary text-secondary" : "text-muted")} />
@@ -419,16 +419,16 @@ export default function ProductDetails() {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-xs uppercase tracking-wider">{t("product.comment") || "Your Review"}</Label>
-                      <textarea 
+                      <textarea
                         required
                         value={newReview.comment}
-                        onChange={e => setNewReview({...newReview, comment: e.target.value})}
+                        onChange={e => setNewReview({ ...newReview, comment: e.target.value })}
                         className="w-full min-h-[100px] p-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-                    <Button 
-                      type="submit" 
-                      disabled={isSubmittingReview} 
+                    <Button
+                      type="submit"
+                      disabled={isSubmittingReview}
                       className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                     >
                       {isSubmittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : t("common.submit")}
