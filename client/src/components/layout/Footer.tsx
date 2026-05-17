@@ -92,7 +92,12 @@ export function Footer() {
                         <div className="grid grid-cols-1 gap-2 pl-6">
                           <a href="tel:01002349187" className="hover:text-secondary transition-colors">01002349187</a>
                           <a href="tel:01003374884" className="hover:text-secondary transition-colors">01003374884</a>
-                          <a href="tel:01150388851" className="hover:text-secondary transition-colors">01150388851</a>
+                          <a href="https://wa.me/201150388851" target="_blank" rel="noopener noreferrer" className="hover:text-secondary transition-colors flex items-center gap-1.5">
+                            01150388851
+                            <span className="text-[10px] bg-[#25D366]/20 text-[#25D366] px-1.5 py-0.5 rounded font-medium">
+                              {language === 'ar' ? 'واتساب' : 'WhatsApp'}
+                            </span>
+                          </a>
                           <a href="tel:01001653773" className="hover:text-secondary transition-colors">01001653773</a>
                         </div>
                       </div>
