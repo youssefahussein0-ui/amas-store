@@ -409,7 +409,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post(api.promoCodes.create.path, async (req, res) => {
     if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
     try {
-      const parsed = insertPromoCodeSchema.parse(req.body);
+      const body = { ...req.body };
+      if (body.expiresAt) {
+        body.expiresAt = new Date(body.expiresAt);
+      }
+      const parsed = insertPromoCodeSchema.parse(body);
       const promo = await storage.createPromoCode(parsed);
       res.status(201).json(promo);
     } catch (err: any) {
