@@ -9,7 +9,7 @@ import { pool } from "./db";
 import bcrypt from "bcryptjs";
 import multer from "multer";
 import { parse } from "csv-parse/sync";
-import { insertProductSchema, insertCategorySchema } from "@shared/schema";
+import { insertProductSchema, insertCategorySchema, insertPromoCodeSchema } from "@shared/schema";
 import { convertGoogleDriveLink } from "@shared/utils";
 import { sendOrderConfirmation } from "./email";
 
@@ -408,8 +408,14 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
 
   app.post(api.promoCodes.create.path, async (req, res) => {
     if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
-    const promo = await storage.createPromoCode(req.body);
-    res.status(201).json(promo);
+    try {
+      const parsed = insertPromoCodeSchema.parse(req.body);
+      const promo = await storage.createPromoCode(parsed);
+      res.status(201).json(promo);
+    } catch (err: any) {
+      console.error("Promo code create error:", err);
+      res.status(400).json({ message: err.message || "Invalid promo code data" });
+    }
   });
 
   app.patch(api.promoCodes.update.path, async (req, res) => {
