@@ -1,7 +1,7 @@
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/use-categories";
 import { useState } from "react";
-import { Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -67,6 +67,30 @@ export default function AdminCategories() {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const uploadData = new FormData();
+    uploadData.append("image", file);
+
+    try {
+      toast({ title: "Uploading image...", description: "Please wait." });
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      
+      setFormData(prev => ({ ...prev, imageUrl: data.url }));
+      toast({ title: "Success", description: "Image uploaded successfully." });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
   const handleDelete = (id: number) => {
     if(confirm(t("admin.products.confirmDelete"))) {
       deleteCategory.mutate(id, {
@@ -107,8 +131,16 @@ export default function AdminCategories() {
                       <Input required value={formData.nameAr} onChange={e=>setFormData({...formData, nameAr: e.target.value})} />
                     </div>
                     <div className="space-y-2">
-                      <Label>Image URL (Use GD Link)</Label>
-                      <Input required value={formData.imageUrl} onChange={e=>setFormData({...formData, imageUrl: e.target.value})} />
+                      <Label>Image URL (Use GD Link or Upload)</Label>
+                      <div className="flex gap-2">
+                        <Input required value={formData.imageUrl} onChange={e=>setFormData({...formData, imageUrl: e.target.value})} placeholder="URL or upload..." />
+                        <div className="relative overflow-hidden shrink-0">
+                          <Button type="button" variant="outline" size="icon">
+                            <Upload className="w-4 h-4" />
+                          </Button>
+                          <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleImageUpload} />
+                        </div>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2 pt-2">
                       <Checkbox id="hasSizes" checked={formData.hasSizes} onCheckedChange={(c)=>setFormData({...formData, hasSizes: !!c})} />

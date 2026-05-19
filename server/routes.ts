@@ -27,7 +27,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.use(
     session({
       store: sessionStore,
-      secret: process.env.SESSION_SECRET,
+      secret: process.env.SESSION_SECRET || "amas-fallback-secret-key-2026",
       resave: false,
       saveUninitialized: false,
       proxy: true,
@@ -204,24 +204,82 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   app.post(api.orders.create.path, async (req, res) => {
     try {
       const input = api.orders.create.input.parse(req.body);
+      const allProducts = await storage.getProducts();
+      
+      let calculatedSubtotal = 0;
+      const orderItemsToCreate = [];
+
+      for (const item of input.items) {
+        const product = allProducts.find(p => p.id === item.productId);
+        if (!product) {
+          return res.status(400).json({ message: `Product with ID ${item.productId} not found` });
+        }
+        if (product.stock < item.quantity) {
+          return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
+        }
+        
+        const itemPrice = product.discountPrice ? Number(product.discountPrice) : Number(product.price);
+        calculatedSubtotal += itemPrice * item.quantity;
+        
+        orderItemsToCreate.push({
+          ...item,
+          price: String(itemPrice)
+        });
+      }
+
+      let discountAmount = 0;
+      let validPromoId = null;
+
+      if (input.promoCode) {
+        const promo = await storage.getPromoCodeByCode(input.promoCode);
+        if (promo && promo.isActive) {
+          const isValid = (!promo.expiresAt || new Date(promo.expiresAt) > new Date()) && 
+                          (!promo.maxUses || (promo.currentUses || 0) < promo.maxUses);
+          if (isValid) {
+            validPromoId = promo.id;
+            if (promo.discountType === 'percentage') {
+              discountAmount = (calculatedSubtotal * Number(promo.discountValue)) / 100;
+            } else {
+              discountAmount = Number(promo.discountValue);
+            }
+          }
+        }
+      }
+
       const order = await storage.createOrder(
         { 
           customerName: input.customerName, 
           customerPhone: input.customerPhone, 
           customerEmail: input.customerEmail || null,
           customerAddress: input.customerAddress, 
-          totalAmount: String(input.totalAmount), 
-          paymentMethod: input.paymentMethod 
+          city: input.city,
+          street: input.street,
+          building: input.building,
+          apartment: input.apartment,
+          floor: input.floor,
+          specialInstructions: input.specialInstructions,
+          paymentMethod: input.paymentMethod,
+          transferPhone: input.transferPhone,
+          promoCode: validPromoId ? input.promoCode : null,
+          discountAmount: String(discountAmount),
+          totalAmount: String(input.totalAmount) 
         },
-        input.items
+        orderItemsToCreate
       );
+
+      if (validPromoId) {
+        await storage.incrementPromoCodeUsage(validPromoId);
+      }
+      
+      for (const item of orderItemsToCreate) {
+        await storage.decreaseProductStock(item.productId, item.quantity);
+      }
 
       if (order.customerEmail) {
         // Send email asynchronously
-        const allProducts = await storage.getProducts();
-        const itemsWithProducts = input.items.map(item => ({
+        const itemsWithProducts = orderItemsToCreate.map(item => ({
           ...item,
-          id: 0, orderId: order.id, price: String(item.price),
+          id: 0, orderId: order.id,
           product: allProducts.find(p => p.id === item.productId)!
         }));
         sendOrderConfirmation(order, itemsWithProducts as any).catch(console.error);
@@ -249,6 +307,12 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     }
   });
 
+  app.delete(api.orders.deleteAll.path, async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    await storage.deleteAllOrders();
+    res.status(204).end();
+  });
+
   app.delete(api.orders.delete.path, async (req, res) => {
     if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
     const id = Number(req.params.id);
@@ -258,10 +322,27 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.status(204).end();
   });
 
-  app.delete(api.orders.deleteAll.path, async (req, res) => {
+  // --- Image Upload Route ---
+  const diskStorage = multer.diskStorage({
+    destination: 'uploads/',
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const ext = file.originalname.split('.').pop() || 'jpg';
+      cb(null, file.fieldname + '-' + uniqueSuffix + '.' + ext);
+    }
+  });
+  
+  const diskUpload = multer({ 
+    storage: diskStorage,
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit for images
+  });
+
+  app.post('/api/upload', diskUpload.single('image'), (req, res) => {
     if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
-    await storage.deleteAllOrders();
-    res.status(204).end();
+    if (!req.file) return res.status(400).json({ message: "No image file provided" });
+    
+    // Return the URL for the uploaded file
+    res.status(201).json({ url: `/uploads/${req.file.filename}` });
   });
 
   // Admin Auth

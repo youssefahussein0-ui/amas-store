@@ -114,6 +114,37 @@ export default function AdminProducts() {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'imageUrl' | 'additionalImages') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const uploadData = new FormData();
+    uploadData.append("image", file);
+
+    try {
+      toast({ title: "Uploading image...", description: "Please wait." });
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+      
+      if (field === 'imageUrl') {
+        setFormData(prev => ({ ...prev, imageUrl: data.url }));
+      } else {
+        setFormData(prev => ({ 
+          ...prev, 
+          additionalImages: prev.additionalImages ? `${prev.additionalImages}\n${data.url}` : data.url 
+        }));
+      }
+      toast({ title: "Success", description: "Image uploaded successfully." });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
   const handleDelete = (id: number) => {
     if(confirm(t("admin.products.confirmDelete"))) {
       deleteProduct.mutate(id, {
@@ -393,7 +424,15 @@ export default function AdminProducts() {
                     </div>
                     <div className="col-span-2 space-y-2">
                       <Label>{t("admin.products.imageUrl")}</Label>
-                      <Input required value={formData.imageUrl} onChange={e=>setFormData({...formData, imageUrl: e.target.value})} />
+                      <div className="flex gap-2">
+                        <Input required value={formData.imageUrl} onChange={e=>setFormData({...formData, imageUrl: e.target.value})} placeholder="URL or upload..." />
+                        <div className="relative overflow-hidden shrink-0">
+                          <Button type="button" variant="outline" size="icon">
+                            <Upload className="w-4 h-4" />
+                          </Button>
+                          <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleImageUpload(e, 'imageUrl')} />
+                        </div>
+                      </div>
                     </div>
                     <div className="col-span-2 space-y-2">
                       <Label>{t("admin.products.description")}</Label>
@@ -405,7 +444,15 @@ export default function AdminProducts() {
                     </div>
                     <div className="col-span-2 space-y-2">
                       <Label>Additional Images (URLs, one per line or comma separated)</Label>
-                      <textarea className="w-full border-border rounded-md p-2 h-24" value={formData.additionalImages} onChange={e=>setFormData({...formData, additionalImages: e.target.value})} />
+                      <div className="flex gap-2">
+                        <textarea className="w-full border-border rounded-md p-2 h-24" value={formData.additionalImages} onChange={e=>setFormData({...formData, additionalImages: e.target.value})} placeholder="URLs or upload multiple..." />
+                        <div className="relative overflow-hidden shrink-0">
+                          <Button type="button" variant="outline" size="icon">
+                            <Upload className="w-4 h-4" />
+                          </Button>
+                          <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleImageUpload(e, 'additionalImages')} />
+                        </div>
+                      </div>
                     </div>
                     {categories?.find(c => c.slug === formData.category)?.hasSizes && (
                       <div className="col-span-2 space-y-2">

@@ -27,7 +27,8 @@ export function convertGoogleDriveLink(url: string | null | undefined): string {
   }
   
   if (id) {
-    return `https://lh3.googleusercontent.com/d/${id}`;
+    // drive.google.com/uc is generally more reliable for direct image embedding than lh3.googleusercontent.com
+    return `https://drive.google.com/uc?export=view&id=${id}`;
   }
 
   return cleanUrl;

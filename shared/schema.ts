@@ -159,7 +159,7 @@ export const reviews = pgTable("reviews", {
   rating: integer("rating").notNull(),
   customerName: text("customer_name").notNull(),
   comment: text("comment").notNull(),
-  isApproved: boolean("is_approved").default(true), // Defaulting to true for now, can be changed later
+  isApproved: boolean("is_approved").default(false), // Defaulting to false, requires admin approval
   createdAt: timestamp("created_at").defaultNow(),
 });
 

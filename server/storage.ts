@@ -12,6 +12,7 @@ export interface IStorage {
   createOrder(order: InsertOrder, items: {productId: number, quantity: number, price: string | number, size?: string | null, color?: string | null}[]): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order | undefined>;
   deleteOrder(id: number): Promise<boolean>;
+  decreaseProductStock(productId: number, quantity: number): Promise<void>;
   getAdminStats(): Promise<{
     totalOrders: number;
     totalRevenue: number;
@@ -87,7 +88,28 @@ export class DatabaseStorage implements IStorage {
         .filter(item => item.orderId === order.id)
         .map(item => {
           const product = allProducts.find(p => p.id === item.productId);
-          return { ...item, product: product! };
+          return { 
+            ...item, 
+            product: product || { 
+              id: item.productId, 
+              name: "Deleted Product", 
+              description: "", 
+              price: String(item.price), 
+              imageUrl: "", 
+              category: "Deleted", 
+              stock: 0, 
+              isNew: false, 
+              isBestSeller: false, 
+              materials: null, 
+              discountPrice: null, 
+              additionalImages: null, 
+              sizes: null, 
+              colors: null, 
+              views: 0, 
+              timeSpent: 0, 
+              createdAt: null 
+            } 
+          };
         })
     }));
   }
@@ -116,6 +138,12 @@ export class DatabaseStorage implements IStorage {
     await db.delete(orderItems).where(eq(orderItems.orderId, id));
     const [deleted] = await db.delete(orders).where(eq(orders.id, id)).returning();
     return !!deleted;
+  }
+
+  async decreaseProductStock(productId: number, quantity: number): Promise<void> {
+    await db.update(products)
+      .set({ stock: sql`${products.stock} - ${quantity}` })
+      .where(eq(products.id, productId));
   }
 
   async getAdminStats() {

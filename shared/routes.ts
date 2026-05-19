@@ -265,7 +265,14 @@ export const api = {
     create: {
       method: 'POST' as const,
       path: '/api/promo-codes' as const,
-      input: z.any(),
+      input: z.object({
+        code: z.string(),
+        discountType: z.enum(['percentage', 'fixed']),
+        discountValue: z.string(),
+        maxUses: z.number().nullable().optional(),
+        expiresAt: z.string().nullable().optional(),
+        isActive: z.boolean().optional()
+      }),
       responses: {
         201: z.any(),
         400: errorSchemas.validation,
@@ -274,7 +281,14 @@ export const api = {
     update: {
       method: 'PATCH' as const,
       path: '/api/promo-codes/:id' as const,
-      input: z.any(),
+      input: z.object({
+        code: z.string().optional(),
+        discountType: z.enum(['percentage', 'fixed']).optional(),
+        discountValue: z.string().optional(),
+        maxUses: z.number().nullable().optional(),
+        expiresAt: z.string().nullable().optional(),
+        isActive: z.boolean().optional()
+      }),
       responses: {
         200: z.any(),
         404: errorSchemas.notFound,
