@@ -45,10 +45,12 @@ export const orders = pgTable("orders", {
   paymentReceiptUrl: text("payment_receipt_url"),
   promoCode: text("promo_code"),
   discountAmount: numeric("discount_amount"),
+  emailSent: boolean("email_sent").default(false),
+  emailHtml: text("email_html"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true, status: true });
+export const insertOrderSchema = createInsertSchema(orders).omit({ id: true, createdAt: true, status: true, emailSent: true, emailHtml: true });
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 
