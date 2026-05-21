@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { products, orders, orderItems, adminUsers, categories, leads, siteVisits, promoCodes, abandonedCarts, reviews, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead, type PromoCode, type InsertPromoCode, type AbandonedCart, type InsertAbandonedCart, type Review, type InsertReview } from "@shared/schema";
+import { products, orders, orderItems, adminUsers, categories, leads, siteVisits, promoCodes, abandonedCarts, reviews, siteSettings, type Product, type InsertProduct, type Order, type InsertOrder, type OrderItem, type OrderWithItems, type AdminUser, type Category, type InsertCategory, type Lead, type InsertLead, type PromoCode, type InsertPromoCode, type AbandonedCart, type InsertAbandonedCart, type Review, type InsertReview } from "@shared/schema";
 import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
@@ -50,6 +50,9 @@ export interface IStorage {
   createReview(review: InsertReview): Promise<Review>;
   deleteReview(id: number): Promise<boolean>;
   approveReview(id: number): Promise<void>;
+
+  getSetting(key: string): Promise<string | null>;
+  setSetting(key: string, value: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -351,6 +354,20 @@ export class DatabaseStorage implements IStorage {
 
   async approveReview(id: number): Promise<void> {
     await db.update(reviews).set({ isApproved: true }).where(eq(reviews.id, id));
+  }
+
+  async getSetting(key: string): Promise<string | null> {
+    const [row] = await db.select().from(siteSettings).where(eq(siteSettings.key, key));
+    return row?.value ?? null;
+  }
+
+  async setSetting(key: string, value: string): Promise<void> {
+    const [existing] = await db.select().from(siteSettings).where(eq(siteSettings.key, key));
+    if (existing) {
+      await db.update(siteSettings).set({ value, updatedAt: new Date() }).where(eq(siteSettings.key, key));
+    } else {
+      await db.insert(siteSettings).values({ key, value });
+    }
   }
 }
 

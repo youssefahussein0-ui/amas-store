@@ -166,3 +166,12 @@ export const reviews = pgTable("reviews", {
 export const insertReviewSchema = createInsertSchema(reviews).omit({ id: true, createdAt: true });
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = z.infer<typeof insertReviewSchema>;
+
+// Site Settings (key-value store for admin toggles)
+export const siteSettings = pgTable("site_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type SiteSetting = typeof siteSettings.$inferSelect;

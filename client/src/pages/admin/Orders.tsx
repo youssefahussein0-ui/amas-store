@@ -68,6 +68,7 @@ export default function AdminOrders() {
               <thead className="text-xs text-muted-foreground bg-muted/30 uppercase">
                 <tr>
                   <th className="px-6 py-4">{t("admin.orders.orderId")}</th>
+                  <th className="px-6 py-4">Date</th>
                   <th className="px-6 py-4">{t("admin.orders.customer")}</th>
                   <th className="px-6 py-4">{t("admin.orders.items")}</th>
                   <th className="px-6 py-4">{t("admin.orders.amount")}</th>
@@ -80,6 +81,10 @@ export default function AdminOrders() {
                 {orders?.map((o: any) => (
                   <tr key={o.id} className="border-b border-border/50 hover:bg-muted/10 transition-colors">
                     <td className="px-6 py-4 font-mono font-medium">#{o.id}</td>
+                    <td className="px-6 py-4 text-xs whitespace-nowrap">
+                      {new Date(o.createdAt).toLocaleDateString()}<br/>
+                      <span className="text-muted-foreground">{new Date(o.createdAt).toLocaleTimeString()}</span>
+                    </td>
                     <td className="px-6 py-4">
                       <div className="font-medium">{o.customerName}</div>
                       <div className="text-xs text-muted-foreground">{o.customerPhone}</div>
@@ -98,6 +103,9 @@ export default function AdminOrders() {
                             <DialogTitle className="font-serif text-2xl flex items-center gap-2">
                               {t("admin.orders.orderDetails")} #{o.id}
                             </DialogTitle>
+                            <p className="text-sm text-muted-foreground">
+                              Placed on: {new Date(o.createdAt).toLocaleDateString()} at {new Date(o.createdAt).toLocaleTimeString()}
+                            </p>
                           </DialogHeader>
                           
                           <div className="mt-4 space-y-6">
@@ -173,6 +181,13 @@ export default function AdminOrders() {
                                 )}
                               </div>
                               <div className="text-right">
+                                {o.promoCode && (
+                                  <div className="mb-2 text-xs">
+                                    <span className="text-muted-foreground">Promo Code:</span>
+                                    <span className="ml-2 font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded border border-green-200">{o.promoCode}</span>
+                                    {o.discountAmount && <span className="ml-2 text-muted-foreground">(-{Number(o.discountAmount).toFixed(2)} {t("product.currency")})</span>}
+                                  </div>
+                                )}
                                 <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">{t("admin.orders.amount")}</p>
                                 <p className="text-2xl font-serif text-primary">{Number(o.totalAmount).toFixed(2)} {t("product.currency")}</p>
                               </div>
@@ -218,7 +233,7 @@ export default function AdminOrders() {
                 ))}
                 {(!orders || orders.length === 0) && (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground font-serif italic text-lg">
+                    <td colSpan={8} className="px-6 py-12 text-center text-muted-foreground font-serif italic text-lg">
                       {t("admin.orders.noOrders")}
                     </td>
                   </tr>

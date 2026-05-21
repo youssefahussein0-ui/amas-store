@@ -31,13 +31,22 @@ export function SpinWheel() {
   const { t } = useLanguage();
 
   useEffect(() => {
-    const hasSeenWheel = localStorage.getItem('hasSeenSpinWheel');
-    if (!hasSeenWheel) {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 3000); // Show after 3 seconds
-      return () => clearTimeout(timer);
-    }
+    const checkAndShow = async () => {
+      try {
+        const res = await fetch('/api/settings/spin_wheel_enabled');
+        const data = await res.json();
+        if (data.value === 'false') return; // Admin disabled it
+      } catch { /* default: show */ }
+
+      const hasSeenWheel = localStorage.getItem('hasSeenSpinWheel');
+      if (!hasSeenWheel) {
+        const timer = setTimeout(() => {
+          setIsOpen(true);
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    };
+    checkAndShow();
   }, []);
 
   const handleClose = () => {

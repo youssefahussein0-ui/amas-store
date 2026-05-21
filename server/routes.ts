@@ -438,6 +438,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.status(204).end();
   });
 
+  // Site Settings
+  app.get("/api/settings/:key", async (req, res) => {
+    const value = await storage.getSetting(req.params.key);
+    res.json({ key: req.params.key, value });
+  });
+
+  app.put("/api/settings/:key", async (req, res) => {
+    if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });
+    const { value } = req.body;
+    await storage.setSetting(req.params.key, String(value));
+    res.json({ key: req.params.key, value: String(value) });
+  });
+
   // Abandoned Carts
   app.get(api.abandonedCarts.list.path, async (req, res) => {
     if (!(req.session as any).adminAuthenticated) return res.status(401).json({ message: "Unauthorized" });

@@ -1,10 +1,11 @@
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
 import { useAdminStats, useClearAllData } from "@/hooks/use-admin";
-import { DollarSign, Package, ShoppingCart, Loader2, TrendingUp, Trash2, Users, Eye, Clock } from "lucide-react";
+import { DollarSign, Package, ShoppingCart, Loader2, TrendingUp, Trash2, Users, Eye, Clock, RotateCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,37 @@ export default function AdminDashboard() {
   const clearData = useClearAllData();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const [spinWheelEnabled, setSpinWheelEnabled] = useState(true);
+  const [spinWheelLoading, setSpinWheelLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/settings/spin_wheel_enabled')
+      .then(res => res.json())
+      .then(data => {
+        setSpinWheelEnabled(data.value !== 'false');
+      })
+      .catch(() => {})
+      .finally(() => setSpinWheelLoading(false));
+  }, []);
+
+  const toggleSpinWheel = async () => {
+    const newValue = !spinWheelEnabled;
+    setSpinWheelEnabled(newValue);
+    try {
+      await fetch('/api/settings/spin_wheel_enabled', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: String(newValue) })
+      });
+      toast({
+        title: "Success",
+        description: `Spin wheel ${newValue ? 'enabled' : 'disabled'}.`,
+      });
+    } catch {
+      setSpinWheelEnabled(!newValue);
+      toast({ title: "Error", description: "Failed to update setting.", variant: "destructive" });
+    }
+  };
 
   const handleResetData = async () => {
     try {
@@ -90,7 +122,18 @@ export default function AdminDashboard() {
             <h1 className="text-4xl font-serif text-primary">{t("admin.dashboard.title")}</h1>
           </motion.div>
 
-          <AlertDialog>
+          <div className="flex items-center gap-3">
+            <Button
+              variant={spinWheelEnabled ? "default" : "outline"}
+              className={`gap-2 ${spinWheelEnabled ? 'bg-secondary hover:bg-secondary/90 text-white' : 'border-muted-foreground/30 text-muted-foreground'}`}
+              onClick={toggleSpinWheel}
+              disabled={spinWheelLoading}
+            >
+              <RotateCw className={`w-4 h-4 ${spinWheelLoading ? 'animate-spin' : ''}`} />
+              {spinWheelEnabled ? "Spin Wheel: ON" : "Spin Wheel: OFF"}
+            </Button>
+
+            <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline" className="text-destructive hover:bg-destructive hover:text-white border-destructive/50 gap-2">
                 <Trash2 className="w-4 h-4" />
@@ -112,6 +155,7 @@ export default function AdminDashboard() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          </div>
         </div>
 
         {isLoading ? (
