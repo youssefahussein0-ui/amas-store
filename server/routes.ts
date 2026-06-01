@@ -345,6 +345,43 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     res.status(201).json({ url: `/uploads/${req.file.filename}` });
   });
 
+  // --- Google Drive Image Proxy Route ---
+  app.get('/api/proxy-image', async (req, res) => {
+    const id = req.query.id as string;
+    if (!id || typeof id !== 'string') {
+      return res.status(400).json({ message: "Missing or invalid Google Drive file ID" });
+    }
+
+    try {
+      const driveUrl = `https://drive.google.com/uc?export=download&id=${id}`;
+      
+      const response = await fetch(driveUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Google Drive returned status: ${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type') || 'image/jpeg';
+      
+      if (contentType.includes('text/html')) {
+        throw new Error('Google Drive redirected to an HTML page instead of serving the image');
+      }
+
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+      
+      const buffer = await response.arrayBuffer();
+      res.send(Buffer.from(buffer));
+    } catch (error: any) {
+      console.error(`[Proxy Image Error] Failed to proxy Google Drive image ${id}:`, error.message);
+      res.status(500).json({ message: "Failed to load Google Drive image" });
+    }
+  });
+
   // Admin Auth
   app.post(api.admin.login.path, async (req: Request, res: Response) => {
     try {
